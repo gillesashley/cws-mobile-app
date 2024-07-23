@@ -1,0 +1,287 @@
+import DateTimePicker, {
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import axios from "axios";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useAuthContext } from "@/components/AuthProvider";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { API_BASE_URL } from "@/config/api";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { Picker } from "@react-native-picker/picker";
+
+export default function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [ghanaCardId, setGhanaCardId] = useState("");
+  const [ghanaCardImage, setGhanaCardImage] = useState<string | null>(null);
+  const [constituencyId, setConstituencyId] = useState("");
+  const [regionId, setRegionId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { register } = useAuthContext();
+  const router = useRouter();
+
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
+  const primaryColor = useThemeColor({}, "tint");
+
+  const handleDateChange = (
+    event: DateTimePickerEvent,
+    selectedDate?: Date
+  ) => {
+    const currentDate = selectedDate || dateOfBirth;
+    setShowDatePicker(false);
+    setDateOfBirth(currentDate);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setGhanaCardImage(result.assets[0].uri);
+    }
+  };
+
+  const handleRegister = async () => {
+    if (
+      !name ||
+      !email ||
+      !phone ||
+      !password ||
+      !passwordConfirmation ||
+      !dateOfBirth ||
+      !ghanaCardId ||
+      !ghanaCardImage ||
+      !constituencyId ||
+      !regionId
+    ) {
+      Alert.alert("Error", "Please fill in all fields");
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    if (
+      new Date(dateOfBirth) >
+      new Date(Date.now() - 18 * 365 * 24 * 60 * 60 * 1000)
+    ) {
+      Alert.alert("Error", "You must be at least 18 years old to register");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("phone", phone);
+      formData.append("password", password);
+      formData.append("date_of_birth", dateOfBirth.toISOString().split("T")[0]);
+      formData.append("ghana_card_id", ghanaCardId);
+      formData.append("constituency_id", constituencyId);
+      formData.append("region_id", regionId);
+      formData.append("role", "user");
+
+      if (ghanaCardImage) {
+        const uriParts = ghanaCardImage.split(".");
+        const fileType = uriParts[uriParts.length - 1];
+
+        formData.append("ghana_card_image", {
+          uri: ghanaCardImage,
+          name: `ghana_card.${fileType}`,
+          type: `image/${fileType}`,
+        } as any);
+      }
+
+      console.log(
+        "Sending registration request to:",
+        `${API_BASE_URL}/register`
+      );
+      console.log("Registration data:", formData);
+
+      const success = await register(formData);
+
+      if (success) {
+        Alert.alert("Success", "Registration successful", [
+          { text: "OK", onPress: () => router.replace("/(tabs)/home") },
+        ]);
+      } else {
+        Alert.alert("Registration Failed", "Please try again");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Error response:", error.response.data);
+        if (error.response.status === 422) {
+          // Validation error
+          const errorMessages = error.response.data.errors;
+          Alert.alert(
+            "Registration Failed",
+            Object.values(errorMessages).flat().join("\n")
+          );
+        } else {
+          Alert.alert("Registration Failed", "An unexpected error occurred");
+        }
+      } else {
+        Alert.alert("Error", "An unexpected error occurred");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <ThemedText style={styles.title}>Register</ThemedText>
+        <Input
+          label="Name"
+          value={name}
+          onChangeText={setName}
+          placeholder="Enter your name"
+        />
+        <Input
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Enter your email"
+          keyboardType="email-address"
+        />
+        <Input
+          label="Phone"
+          value={phone}
+          onChangeText={setPhone}
+          placeholder="Enter your phone number"
+          keyboardType="phone-pad"
+        />
+        <Input
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Enter your password"
+          secureTextEntry
+        />
+        <Input
+          label="Confirm Password"
+          value={passwordConfirmation}
+          onChangeText={setPasswordConfirmation}
+          placeholder="Confirm your password"
+          secureTextEntry
+        />
+        <ThemedView style={styles.datePickerContainer}>
+          <ThemedText>Date of Birth</ThemedText>
+          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
+            <ThemedText>{dateOfBirth.toDateString()}</ThemedText>
+          </TouchableOpacity>
+          {showDatePicker && (
+            <DateTimePicker
+              value={dateOfBirth}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
+              // Add this line
+              timeZoneOffsetInMinutes={0}
+            />
+          )}
+        </ThemedView>
+        <Input
+          label="Ghana Card ID"
+          value={ghanaCardId}
+          onChangeText={setGhanaCardId}
+          placeholder="Enter your Ghana Card ID"
+        />
+        <ThemedView style={styles.imagePickerContainer}>
+          <Button title="Upload Ghana Card Image" onPress={pickImage} />
+          {ghanaCardImage && (
+            <Image source={{ uri: ghanaCardImage }} style={styles.image} />
+          )}
+        </ThemedView>
+        <Picker
+          selectedValue={regionId}
+          onValueChange={(itemValue) => setRegionId(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Region" value="" />
+          {/* Add region options here */}
+        </Picker>
+        <Picker
+          selectedValue={constituencyId}
+          onValueChange={(itemValue) => setConstituencyId(itemValue)}
+          style={styles.picker}
+        >
+          <Picker.Item label="Select Constituency" value="" />
+          {/* Add constituency options here */}
+        </Picker>
+        <Button
+          title={isLoading ? "Registering..." : "Register"}
+          onPress={handleRegister}
+          disabled={isLoading}
+          style={styles.registerButton}
+        />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  datePickerContainer: {
+    marginBottom: 20,
+  },
+  imagePickerContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    marginTop: 10,
+  },
+  picker: {
+    marginBottom: 20,
+  },
+  registerButton: {
+    marginTop: 20,
+  },
+});

@@ -1,22 +1,23 @@
-/**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
- */
+import { Colors } from "@/constants/Colors";
 
-import { useColorScheme } from 'react-native';
+type ColorName = keyof typeof Colors.light & keyof typeof Colors.dark;
 
-import { Colors } from '@/constants/Colors';
+type ExtendedColorName = ColorName | "border";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof Colors.light & keyof typeof Colors.dark
+  colorName: ExtendedColorName
 ) {
-  const theme = useColorScheme() ?? 'light';
+  // Always use 'light' theme
+  const theme = "light";
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
     return colorFromProps;
+  } else if (colorName === "border") {
+    // Default border colors based on the light color scheme
+    return Colors.light.icon;
   } else {
-    return Colors[theme][colorName];
+    return Colors.light[colorName];
   }
 }
