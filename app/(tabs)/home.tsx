@@ -48,7 +48,7 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <Image
-          source={require("@/assets/images/icon.png")}
+          source={require("@/assets/images/logo.png")}
           style={styles.logo}
         />
         <ThemedText style={styles.headerTitle}>CWS</ThemedText>

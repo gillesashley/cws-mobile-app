@@ -1,4 +1,3 @@
-import { useThemeColor } from "@/hooks/useThemeColor";
 import React from "react";
 import {
   StyleSheet,
@@ -7,15 +6,13 @@ import {
   TextStyle,
   View,
   ViewStyle,
+  TextInputProps,
 } from "react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { Colors } from "@/constants/Colors";
 
-interface InputProps {
+interface InputProps extends TextInputProps {
   label: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  placeholder?: string;
-  secureTextEntry?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
   style?: ViewStyle;
   labelStyle?: TextStyle;
   inputStyle?: TextStyle;
@@ -31,32 +28,35 @@ export function Input({
   style,
   labelStyle,
   inputStyle,
+  editable = true,
+  ...restProps
 }: InputProps) {
-  const backgroundColor = useThemeColor({}, "background");
-  const textColor = useThemeColor({}, "text");
-  const borderColor = useThemeColor({}, "border");
+  const colorScheme = useThemeColor({}, "background");
+  const colors = Colors[colorScheme === 'dark' ? 'dark' : 'light'];
 
   return (
     <View style={[styles.container, style]}>
-      <Text style={[styles.label, { color: textColor }, labelStyle]}>
+      <Text style={[styles.label, { color: colors.text }, labelStyle]}>
         {label}
       </Text>
       <TextInput
         style={[
           styles.input,
           {
-            backgroundColor,
-            color: textColor,
-            borderColor,
+            backgroundColor: editable ? colors.background : colors.surface,
+            color: colors.text,
+            borderColor: colors.border,
           },
           inputStyle,
         ]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={useThemeColor({}, "icon")}
+        placeholderTextColor={colors.placeholder}
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
+        editable={editable}
+        {...restProps}
       />
     </View>
   );
@@ -69,11 +69,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
+    fontWeight: '600',
   },
   input: {
     height: 40,
     borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 8,
+    borderRadius: 8,
+    paddingHorizontal: 12,
   },
 });

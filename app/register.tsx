@@ -52,6 +52,18 @@ export default function Register() {
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "tint");
 
+  const checkPhoneAvailability = async (phone: string) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/check-phone`, {
+        phone,
+      });
+      return response.data.available;
+    } catch (error) {
+      console.error("Error checking phone availability:", error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     const loadRegions = async () => {
       try {
@@ -139,6 +151,13 @@ export default function Register() {
       return;
     }
 
+    // Add the phone availability check here
+    const isPhoneAvailable = await checkPhoneAvailability(phone);
+    if (!isPhoneAvailable) {
+      Alert.alert("Error", "This phone number is already registered.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -174,7 +193,7 @@ export default function Register() {
 
       if (success) {
         Alert.alert("Success", "Registration successful", [
-          { text: "OK", onPress: () => router.replace("/(tabs)/home") },
+          { text: "OK", onPress: () => router.replace("/login") },
         ]);
       } else {
         Alert.alert("Registration Failed", "Please try again");
@@ -240,9 +259,14 @@ export default function Register() {
           secureTextEntry
         />
         <ThemedView style={styles.datePickerContainer}>
-          <ThemedText>Date of Birth</ThemedText>
-          <TouchableOpacity onPress={() => setShowDatePicker(true)}>
-            <ThemedText>{dateOfBirth.toDateString()}</ThemedText>
+          <ThemedText style={styles.inputLabel}>Date of Birth</ThemedText>
+          <TouchableOpacity
+            style={styles.datePickerButton}
+            onPress={() => setShowDatePicker(true)}
+          >
+            <ThemedText style={styles.datePickerButtonText}>
+              {dateOfBirth.toDateString()}
+            </ThemedText>
           </TouchableOpacity>
           {showDatePicker && (
             <DateTimePicker
@@ -250,7 +274,7 @@ export default function Register() {
               mode="date"
               display="default"
               onChange={handleDateChange}
-              timeZoneOffsetInMinutes={0}
+              style={styles.datePicker}
             />
           )}
         </ThemedView>
@@ -338,5 +362,22 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     marginTop: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  datePickerButton: {
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+  },
+  datePickerButtonText: {
+    fontSize: 16,
+  },
+  datePicker: {
+    width: "100%",
+    marginTop: 10,
   },
 });

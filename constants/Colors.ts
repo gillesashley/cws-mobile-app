@@ -1,21 +1,34 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
+import { ColorSchemeName } from "react-native";
 
-const tintColorLight = "#0a7ea4";
-const tintColorDark = "#fff";
+// Define the primary and secondary colors
 const primaryColor = "#0200FF";
 const secondaryColor = "#D0041D";
 
-export const Colors = {
+// Define the color scheme type
+export type ColorScheme = "light" | "dark";
+
+// Define the structure for a set of colors
+export interface ColorSet {
+  text: string;
+  background: string;
+  tint: string;
+  icon: string;
+  tabIconDefault: string;
+  tabIconSelected: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+  success: string;
+  warning: string;
+  error: string;
+  surface: string;
+  border: string;
+  placeholder: string;
+}
+
+// Define the Colors object with light and dark schemes
+export const Colors: Record<ColorScheme, ColorSet> = {
   light: {
-    // text: '#11181C',
-    // background: '#fff',
-    // tint: tintColorLight,
-    // icon: '#687076',
-    // tabIconDefault: '#687076',
-    // tabIconSelected: tintColorLight,
     text: "#11181C",
     background: "#FFFFFF",
     tint: primaryColor,
@@ -24,7 +37,7 @@ export const Colors = {
     tabIconSelected: primaryColor,
     primary: primaryColor,
     secondary: secondaryColor,
-    accent: "#4D4DFF", // A slightly lighter shade of the primary color for accents
+    accent: "#4D4DFF",
     success: "#34C759",
     warning: "#FF9500",
     error: secondaryColor,
@@ -35,9 +48,23 @@ export const Colors = {
   dark: {
     text: "#ECEDEE",
     background: "#151718",
-    tint: tintColorDark,
+    tint: "#FFFFFF",
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
+    tabIconSelected: "#FFFFFF",
+    primary: primaryColor,
+    secondary: secondaryColor,
+    accent: "#6E6EFF",
+    success: "#32D74B",
+    warning: "#FFD60A",
+    error: "#FF453A",
+    surface: "#1C1D1E",
+    border: "#2C2D2E",
+    placeholder: "#6C6D6E",
   },
 };
+
+// Helper function to get colors based on the color scheme
+export function getColors(colorScheme: ColorSchemeName): ColorSet {
+  return Colors[colorScheme === "dark" ? "dark" : "light"];
+}

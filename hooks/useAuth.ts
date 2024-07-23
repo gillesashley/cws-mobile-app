@@ -82,12 +82,24 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     try {
+      // Call your API to invalidate the token if necessary
+      await axios.post(
+        `${API_BASE_URL}/logout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${authState.token}` },
+        }
+      );
+
+      // Clear the stored auth state
       await AsyncStorage.removeItem("authState");
       setAuthState({ token: null, user: null });
+      return true;
     } catch (error) {
       console.error("Logout error:", error);
+      return false;
     }
-  }, []);
+  }, [authState.token]);
 
   const isAuthenticated = authState.token !== null;
 
