@@ -1,10 +1,11 @@
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -21,7 +22,12 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { API_BASE_URL } from "@/config/api";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { Picker } from "@react-native-picker/picker";
+import {
+  Constituency,
+  fetchConstituencies,
+  fetchRegions,
+  Region,
+} from "@/services/regionService";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -33,9 +39,11 @@ export default function Register() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [ghanaCardId, setGhanaCardId] = useState("");
   const [ghanaCardImage, setGhanaCardImage] = useState<string | null>(null);
-  const [constituencyId, setConstituencyId] = useState("");
   const [regionId, setRegionId] = useState("");
+  const [constituencyId, setConstituencyId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [constituencies, setConstituencies] = useState<Constituency[]>([]);
 
   const { register } = useAuthContext();
   const router = useRouter();
@@ -43,6 +51,41 @@ export default function Register() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "tint");
+
+  useEffect(() => {
+    const loadRegions = async () => {
+      try {
+        const fetchedRegions = await fetchRegions();
+        setRegions(fetchedRegions);
+      } catch (error) {
+        console.error("Failed to load regions:", error);
+        Alert.alert("Error", "Failed to load regions. Please try again.");
+      }
+    };
+
+    loadRegions();
+  }, []);
+
+  const handleRegionChange = async (itemValue: string) => {
+    setRegionId(itemValue);
+    setConstituencyId("");
+    if (itemValue) {
+      try {
+        const fetchedConstituencies = await fetchConstituencies(
+          Number(itemValue)
+        );
+        setConstituencies(fetchedConstituencies);
+      } catch (error) {
+        console.error("Failed to load constituencies:", error);
+        Alert.alert(
+          "Error",
+          "Failed to load constituencies. Please try again."
+        );
+      }
+    } else {
+      setConstituencies([]);
+    }
+  };
 
   const handleDateChange = (
     event: DateTimePickerEvent,
@@ -76,8 +119,8 @@ export default function Register() {
       !dateOfBirth ||
       !ghanaCardId ||
       !ghanaCardImage ||
-      !constituencyId ||
-      !regionId
+      !regionId ||
+      !constituencyId
     ) {
       Alert.alert("Error", "Please fill in all fields");
       return;
@@ -106,8 +149,8 @@ export default function Register() {
       formData.append("password", password);
       formData.append("date_of_birth", dateOfBirth.toISOString().split("T")[0]);
       formData.append("ghana_card_id", ghanaCardId);
-      formData.append("constituency_id", constituencyId);
       formData.append("region_id", regionId);
+      formData.append("constituency_id", constituencyId);
       formData.append("role", "user");
 
       if (ghanaCardImage) {
@@ -207,7 +250,6 @@ export default function Register() {
               mode="date"
               display="default"
               onChange={handleDateChange}
-              // Add this line
               timeZoneOffsetInMinutes={0}
             />
           )}
@@ -226,19 +268,32 @@ export default function Register() {
         </ThemedView>
         <Picker
           selectedValue={regionId}
-          onValueChange={(itemValue) => setRegionId(itemValue)}
+          onValueChange={handleRegionChange}
           style={styles.picker}
         >
           <Picker.Item label="Select Region" value="" />
-          {/* Add region options here */}
+          {regions.map((region) => (
+            <Picker.Item
+              key={region.id}
+              label={region.name}
+              value={region.id.toString()}
+            />
+          ))}
         </Picker>
         <Picker
           selectedValue={constituencyId}
           onValueChange={(itemValue) => setConstituencyId(itemValue)}
           style={styles.picker}
+          enabled={!!regionId}
         >
           <Picker.Item label="Select Constituency" value="" />
-          {/* Add constituency options here */}
+          {constituencies.map((constituency) => (
+            <Picker.Item
+              key={constituency.id}
+              label={constituency.name}
+              value={constituency.id.toString()}
+            />
+          ))}
         </Picker>
         <Button
           title={isLoading ? "Registering..." : "Register"}
