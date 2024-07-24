@@ -1,3 +1,4 @@
+import { Input } from "@/components/ui/Input";
 import {
   Constituency,
   fetchConstituencies,
@@ -9,8 +10,12 @@ import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 
 interface LocationStepProps {
-  onComplete: (data: { regionId: string; constituencyId: string }) => void;
-  initialData: { regionId: string; constituencyId: string };
+  onComplete: (data: {
+    regionId: string;
+    constituencyId: string;
+    area: string;
+  }) => void;
+  initialData: { regionId: string; constituencyId: string; area: string };
 }
 
 export default function LocationStep({
@@ -23,6 +28,7 @@ export default function LocationStep({
   const [constituencyId, setConstituencyId] = useState(
     initialData.constituencyId
   );
+  const [area, setArea] = useState(initialData.area);
 
   useEffect(() => {
     loadRegions();
@@ -57,7 +63,7 @@ export default function LocationStep({
   };
 
   const handleNext = () => {
-    onComplete({ regionId, constituencyId });
+    onComplete({ regionId, constituencyId, area });
   };
 
   return (
@@ -91,6 +97,13 @@ export default function LocationStep({
           />
         ))}
       </Picker>
+      <Input
+        label="Area"
+        value={area}
+        onChangeText={setArea}
+        placeholder="Enter your specific area"
+        style={styles.input}
+      />
     </View>
   );
 }
@@ -100,6 +113,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   picker: {
+    marginBottom: 20,
+  },
+  input: {
     marginBottom: 20,
   },
 });

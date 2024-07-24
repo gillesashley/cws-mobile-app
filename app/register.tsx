@@ -1,6 +1,14 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, StyleSheet, View } from "react-native";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuthContext } from "@/components/AuthProvider";
@@ -18,6 +26,8 @@ enum RegistrationStep {
   Verification = 3,
 }
 
+const { width } = Dimensions.get("window");
+
 export default function Register() {
   const [currentStep, setCurrentStep] = useState<RegistrationStep>(
     RegistrationStep.Credentials
@@ -32,12 +42,14 @@ export default function Register() {
     dateOfBirth: new Date(),
     ghanaCardId: "",
     ghanaCardImage: null as string | null,
+    area: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const { register } = useAuthContext();
   const router = useRouter();
   const backgroundColor = useThemeColor({}, "background");
+  const primaryColor = useThemeColor({}, "primary");
 
   const handleStepComplete = (stepData: Partial<typeof formData>) => {
     setFormData({ ...formData, ...stepData });
@@ -59,12 +71,15 @@ export default function Register() {
     try {
       const registrationData = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'dateOfBirth') {
-          registrationData.append(key, (value as Date).toISOString().split('T')[0]);
-        } else if (key === 'ghanaCardImage' && value) {
-          const uriParts = (value as string).split('.');
+        if (key === "dateOfBirth") {
+          registrationData.append(
+            key,
+            (value as Date).toISOString().split("T")[0]
+          );
+        } else if (key === "ghanaCardImage" && value) {
+          const uriParts = (value as string).split(".");
           const fileType = uriParts[uriParts.length - 1];
-          registrationData.append('ghana_card_image', {
+          registrationData.append("ghana_card_image", {
             uri: value,
             name: `ghana_card.${fileType}`,
             type: `image/${fileType}`,
@@ -118,38 +133,76 @@ export default function Register() {
     }
   };
 
+  const renderProgressBar = () => {
+    const progress = (currentStep / 3) * 100;
+    return (
+      <View style={styles.progressBarContainer}>
+        <View
+          style={[
+            styles.progressBar,
+            { width: `${progress}%`, backgroundColor: primaryColor },
+          ]}
+        />
+      </View>
+    );
+  };
+
+  const getStepTitle = () => {
+    switch (currentStep) {
+      case RegistrationStep.Credentials:
+        return "Credentials";
+      case RegistrationStep.Location:
+        return "Location";
+      case RegistrationStep.Verification:
+        return "Verification";
+      default:
+        return "";
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
-      <View style={styles.content}>
-        <ThemedText style={styles.title}>
-          Register - Step {currentStep} of 3
-        </ThemedText>
-        {renderStep()}
-        <View style={styles.navigationButtons}>
-          {currentStep > RegistrationStep.Credentials && (
-            <Button
-              title="Previous"
-              onPress={handlePrevious}
-              style={styles.button}
-            />
-          )}
-          {currentStep < RegistrationStep.Verification && (
-            <Button
-              title="Next"
-              onPress={() => handleStepComplete({})}
-              style={styles.button}
-            />
-          )}
-          {currentStep === RegistrationStep.Verification && (
-            <Button
-              title={isLoading ? "Registering..." : "Complete Registration"}
-              onPress={handleRegister}
-              disabled={isLoading}
-              style={styles.button}
-            />
-          )}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
+      >
+        <View style={styles.content}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+          />
+          {renderProgressBar()}
+          <ThemedText style={styles.title}>{getStepTitle()}</ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Step {currentStep} of 3
+          </ThemedText>
+          {renderStep()}
+          <View style={styles.navigationButtons}>
+            {currentStep > RegistrationStep.Credentials && (
+              <Button
+                title="Previous"
+                onPress={handlePrevious}
+                style={styles.button}
+              />
+            )}
+            {currentStep < RegistrationStep.Verification && (
+              <Button
+                title="Next"
+                onPress={() => handleStepComplete({})}
+                style={styles.button}
+              />
+            )}
+            {currentStep === RegistrationStep.Verification && (
+              <Button
+                title={isLoading ? "Registering..." : "Complete Registration"}
+                onPress={handleRegister}
+                disabled={isLoading}
+                style={styles.button}
+              />
+            )}
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -158,10 +211,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  keyboardAvoidingView: {
     flex: 1,
-    padding: 20,
-    justifyContent: "space-between",
   },
   title: {
     fontSize: 24,
@@ -169,6 +220,35 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: "center",
   },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+    opacity: 0.7,
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+    justifyContent: "space-between",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  progressBarContainer: {
+    height: 10,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 5,
+    marginBottom: 20,
+  },
+  progressBar: {
+    height: "100%",
+    borderRadius: 5,
+  },
+
   navigationButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
