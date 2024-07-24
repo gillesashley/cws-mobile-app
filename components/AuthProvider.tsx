@@ -34,13 +34,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (storedAuthState) {
         const parsedAuthState = JSON.parse(storedAuthState);
         setAuthState(parsedAuthState);
-        // Set the default Authorization header for all future requests
-        axios.defaults.headers.common[
-          "Authorization"
-        ] = `Bearer ${parsedAuthState.token}`;
+        setAxiosDefaultHeaders(parsedAuthState.token);
       }
     } catch (error) {
       console.error("Error loading auth state:", error);
+    }
+  };
+
+  const setAxiosDefaultHeaders = (token: string | null) => {
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      delete axios.defaults.headers.common["Authorization"];
     }
   };
 
@@ -48,10 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await AsyncStorage.setItem("authState", JSON.stringify(newAuthState));
       setAuthState(newAuthState);
-      // Set the default Authorization header for all future requests
-      axios.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${newAuthState.token}`;
+      setAxiosDefaultHeaders(newAuthState.token);
     } catch (error) {
       console.error("Error saving auth state:", error);
     }
@@ -67,31 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await saveAuthState({ token, user });
       return true;
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 422) {
-          // Validation error
-          const validationErrors = error.response.data.errors;
-          console.error("Validation errors:", validationErrors);
-
-          // Create a user-friendly error message
-          const errorMessages = Object.values(validationErrors).flat();
-          const errorMessage = errorMessages.join("\n");
-
-          // You can use Alert.alert here if you're in a React component
-          // Alert.alert("Login Failed", errorMessage);
-
-          // Or you can throw an error to be caught by the component using this function
-          throw new Error(errorMessage);
-        } else {
-          console.error("Login error:", error.response.data);
-          throw new Error(
-            error.response.data.message || "An unexpected error occurred"
-          );
-        }
-      } else {
-        console.error("Login error:", error);
-        throw new Error("An unexpected error occurred");
-      }
+      console.error("Login error:", error);
+      return false;
     }
   };
 
@@ -113,20 +92,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async (): Promise<void> => {
     try {
-      // Call your API to invalidate the token if necessary
-      await axios.post(
-        `${API_BASE_URL}/logout`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${authState.token}` },
-        }
-      );
-
-      // Clear the stored auth state
+      await axios.post(`${API_BASE_URL}/logout`);
       await AsyncStorage.removeItem("authState");
       setAuthState({ token: null, user: null });
-      // Remove the Authorization header
-      delete axios.defaults.headers.common["Authorization"];
+      setAxiosDefaultHeaders(null);
     } catch (error) {
       console.error("Logout error:", error);
     }

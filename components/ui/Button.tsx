@@ -11,8 +11,8 @@ import {
 interface ButtonProps {
   onPress: () => void;
   title: string;
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: ViewStyle | ViewStyle[];
+  textStyle?: TextStyle | TextStyle[];
   disabled?: boolean;
 }
 
@@ -37,12 +37,18 @@ export function Button({
       style={[
         styles.button,
         { backgroundColor: disabled ? "#CCCCCC" : backgroundColor },
-        style,
+        ...(Array.isArray(style) ? style : [style]),
       ]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.text, { color: textColor }, textStyle]}>
+      <Text
+        style={[
+          styles.text,
+          { color: textColor },
+          ...(Array.isArray(textStyle) ? textStyle : [textStyle]),
+        ]}
+      >
         {title}
       </Text>
     </TouchableOpacity>

@@ -26,6 +26,7 @@ type ColorScheme = "light" | "dark";
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { user, logout } = useAuthContext();
   const router = useRouter();
@@ -38,13 +39,74 @@ export default function ProfileScreen() {
 
   const fetchProfile = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
       const userData = await fetchUserProfile(user.token);
       setProfile(userData);
     } catch (error) {
       console.error("Error fetching user profile:", error);
-      Alert.alert("Error", "Failed to load user profile");
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 401) {
+          setError("Your session has expired. Please log in again.");
+          // Optionally, you can call logout here and redirect to login screen
+          // await logout();
+          // router.replace("/login");
+        } else {
+          setError(
+            `Failed to load user profile: ${
+              error.response.data.message || "Unknown error"
+            }`
+          );
+        }
+      } else {
+        setError("An unexpected error occurred while fetching your profile.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      Alert.alert("Error", "Failed to logout. Please try again.");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
+        <ThemedText>Loading profile...</ThemedText>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
+        <ThemedText style={styles.errorText}>{error}</ThemedText>
+        <Button
+          title="Try Again"
+          onPress={fetchProfile}
+          style={styles.button}
+        />
+        <Button
+          title="Logout"
+          onPress={handleLogout}
+          style={[styles.button, styles.logoutButton]}
+        />
+      </SafeAreaView>
+    );
+  }
 
   const handleSaveChanges = async () => {
     setIsLoading(true);
@@ -68,16 +130,6 @@ export default function ProfileScreen() {
       Alert.alert("Error", "Failed to update profile");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.replace("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      Alert.alert("Error", "Failed to logout. Please try again.");
     }
   };
 
@@ -265,5 +317,10 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 20,
+  },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 20,
   },
 });

@@ -68,6 +68,7 @@ export default function HomeScreen() {
             data={campaignPosts}
             renderItem={({ item }) => (
               <CampaignPost
+                id={item.id}
                 title={item.title}
                 description={item.description}
                 imageUrl={item.imageUrl}

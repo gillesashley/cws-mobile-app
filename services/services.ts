@@ -52,9 +52,13 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
     const response = await axios.get(`${API_BASE_URL}/user-profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data.data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching user profile:", error);
+    if (axios.isAxiosError(error)) {
+      console.error("Error response:", error.response);
+      console.error("Error request:", error.request);
+      console.error("Error config:", error.config);
+    }
     throw error;
   }
 };

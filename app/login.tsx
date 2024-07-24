@@ -51,10 +51,7 @@ export default function Login() {
 
       if (response.data.token && response.data.user) {
         // Call the login function from AuthContext
-        const loginResult = await login(
-          response.data.user,
-          response.data.token
-        );
+        const loginResult = await login(email, password);
         if (loginResult) {
           router.replace("/(tabs)/home");
         } else {
@@ -66,11 +63,31 @@ export default function Login() {
     } catch (error) {
       console.error("Login error:", error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorMessage =
-          error.response.data.message || "An unknown error occurred";
-        Alert.alert("Login Failed", errorMessage);
+        const { status, data } = error.response;
+
+        if (status === 422 || status === 400) {
+          // Validation error or Bad Request
+          let errorMessage = "Invalid login credentials. Please try again.";
+
+          if (data.errors && typeof data.errors === "object") {
+            const errorMessages = Object.values(data.errors).flat();
+            errorMessage = errorMessages.join("\n");
+          } else if (data.message) {
+            errorMessage = data.message;
+          }
+
+          Alert.alert("Login Failed", errorMessage);
+        } else {
+          Alert.alert(
+            "Login Failed",
+            data.message || "An unexpected error occurred"
+          );
+        }
       } else {
-        Alert.alert("Login Failed", "An unexpected error occurred");
+        Alert.alert(
+          "Login Failed",
+          "An unexpected error occurred. Please check your internet connection and try again."
+        );
       }
     } finally {
       setIsLoading(false);
