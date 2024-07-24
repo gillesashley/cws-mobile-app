@@ -11,6 +11,7 @@ interface AuthState {
 interface AuthContextType {
   isAuthenticated: boolean;
   user: any | null;
+  token: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: FormData) => Promise<boolean>;
   logout: () => Promise<void>;
@@ -104,8 +105,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAuthenticated = authState.token !== null;
 
   const contextValue: AuthContextType = {
-    isAuthenticated,
+    isAuthenticated: authState.token !== null,
     user: authState.user,
+    token: authState.token,
     login,
     register,
     logout,

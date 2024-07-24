@@ -24,6 +24,18 @@ export interface UserProfile {
   push_notifications: boolean;
 }
 
+export interface CampaignMessage {
+  id: string;
+  title: string;
+  content: string;
+  user: {
+    name: string;
+  };
+  likes_count: number;
+  shares_count: number;
+  reads: number;
+}
+
 export const fetchRegions = async (): Promise<Region[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/regions`);
@@ -44,6 +56,20 @@ export const fetchConstituencies = async (
     return response.data.data;
   } catch (error) {
     console.error("Error fetching constituencies:", error);
+    throw error;
+  }
+};
+
+export const fetchCampaignMessages = async (
+  token: string
+): Promise<CampaignMessage[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/campaign-messages`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching campaign messages:", error);
     throw error;
   }
 };

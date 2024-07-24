@@ -1,45 +1,71 @@
-import React from "react";
-import { FlatList, Image, ScrollView, StyleSheet, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuthContext } from "@/components/AuthProvider";
 import { CampaignPost } from "@/components/CampaignPost";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-
-const campaignPosts = [
-  {
-    id: "1",
-    title: "Education Reform",
-    description: "Join us in our mission to improve the education system.",
-    imageUrl:
-      "https://plus.unsplash.com/premium_photo-1682125707803-f985bb8d8b6a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJlc2lkZW50fGVufDB8fDB8fHww",
-    likes: 120,
-    shares: 45,
-  },
-  {
-    id: "2",
-    title: "Healthcare Initiative",
-    description: "Support our efforts to enhance healthcare services.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1721309689084-da4ab4fae11c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxOHx8fGVufDB8fHx8fA%3D%3D",
-    likes: 98,
-    shares: 32,
-  },
-  {
-    id: "3",
-    title: "Environmental Protection",
-    description: "Help us preserve our natural resources.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1580128660010-fd027e1e587a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dHJ1bXB8ZW58MHx8MHx8fDA%3D",
-    likes: 156,
-    shares: 67,
-  },
-];
+import { CampaignMessage, fetchCampaignMessages } from "@/services/services";
 
 export default function HomeScreen() {
+  const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>(
+    []
+  );
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
+
+  useEffect(() => {
+    const loadCampaignMessages = async () => {
+      if (!token) {
+        setError("You must be logged in to view campaign messages.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const messages = await fetchCampaignMessages(token);
+        setCampaignMessages(messages);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching campaign messages:", err);
+        setError("Failed to load campaign messages. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCampaignMessages();
+  }, [token]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <ActivityIndicator size="large" color={textColor} />
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <ThemedText>{error}</ThemedText>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -65,15 +91,15 @@ export default function HomeScreen() {
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={campaignPosts}
+            data={campaignMessages}
             renderItem={({ item }) => (
               <CampaignPost
                 id={item.id}
                 title={item.title}
-                description={item.description}
-                imageUrl={item.imageUrl}
-                likes={item.likes}
-                shares={item.shares}
+                description={item.content}
+                imageUrl="https://via.placeholder.com/150" // You might want to add an image field to your campaign messages
+                likes={item.likes_count}
+                shares={item.shares_count}
               />
             )}
             keyExtractor={(item) => item.id}
