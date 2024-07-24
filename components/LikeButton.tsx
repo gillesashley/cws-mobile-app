@@ -13,7 +13,11 @@ interface LikeButtonProps {
   onLikeSuccess: (pointsAwarded: number) => void;
 }
 
-export function LikeButton({ postId, likes, onLikeSuccess }: LikeButtonProps) {
+export default function LikeButton({
+  postId,
+  likes,
+  onLikeSuccess,
+}: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(false);
   const { user } = useAuthContext();
 

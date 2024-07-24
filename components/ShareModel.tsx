@@ -14,7 +14,7 @@ interface ShareModalProps {
   postId: string;
 }
 
-export function ShareModal({
+export default function ShareModal({
   isVisible,
   onClose,
   onShare,
