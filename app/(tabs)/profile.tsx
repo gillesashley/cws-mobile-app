@@ -1,3 +1,4 @@
+import { fetchUserProfile, UserProfile } from "@/services/services";
 import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -23,37 +24,22 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 type ColorScheme = "light" | "dark";
 
 export default function ProfileScreen() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [constituency, setConstituency] = useState("");
-  const [region, setRegion] = useState("");
-  const [emailNotifications, setEmailNotifications] = useState(false);
-  const [pushNotifications, setPushNotifications] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const { user, logout } = useAuthContext();
   const router = useRouter();
   const colorScheme = useThemeColor({}, "background") as ColorScheme;
-  const colors = Colors[colorScheme];
+  const colors = Colors[colorScheme] || Colors.light;
 
   useEffect(() => {
-    fetchUserProfile();
+    fetchProfile();
   }, []);
 
-  const fetchUserProfile = async () => {
+  const fetchProfile = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/user-profile`, {
-        headers: { Authorization: `Bearer ${user.token}` },
-      });
-      const userData = response.data;
-      setName(userData.name);
-      setEmail(userData.email);
-      setPhone(userData.phone);
-      setConstituency(userData.constituency.name);
-      setRegion(userData.region.name);
-      setEmailNotifications(userData.email_notifications);
-      setPushNotifications(userData.push_notifications);
+      const userData = await fetchUserProfile(user.token);
+      setProfile(userData);
     } catch (error) {
       console.error("Error fetching user profile:", error);
       Alert.alert("Error", "Failed to load user profile");
@@ -66,11 +52,11 @@ export default function ProfileScreen() {
       await axios.put(
         `${API_BASE_URL}/update-profile`,
         {
-          name,
-          email,
-          phone,
-          email_notifications: emailNotifications,
-          push_notifications: pushNotifications,
+          name: profile?.name,
+          email: profile?.email,
+          phone: profile?.phone,
+          email_notifications: profile?.email_notifications,
+          push_notifications: profile?.push_notifications,
         },
         {
           headers: { Authorization: `Bearer ${user.token}` },
@@ -95,9 +81,23 @@ export default function ProfileScreen() {
     }
   };
 
+  if (!profile) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        edges={["top"]}
+      >
+        <ThemedText>Loading profile...</ThemedText>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.background }]}
+      style={[
+        styles.container,
+        { backgroundColor: colors.background || "#FFFFFF" },
+      ]}
       edges={["top"]}
     >
       <ScrollView style={styles.scrollView}>
@@ -110,16 +110,16 @@ export default function ProfileScreen() {
             </ThemedText>
             <Input
               label="Name"
-              value={name}
-              onChangeText={setName}
+              value={profile.name}
+              onChangeText={(text) => setProfile({ ...profile, name: text })}
               placeholder="Enter your name"
               style={styles.input}
               labelStyle={styles.inputLabel}
             />
             <Input
               label="Email"
-              value={email}
-              onChangeText={setEmail}
+              value={profile.email}
+              onChangeText={(text) => setProfile({ ...profile, email: text })}
               placeholder="Enter your email"
               keyboardType="email-address"
               style={styles.input}
@@ -127,8 +127,8 @@ export default function ProfileScreen() {
             />
             <Input
               label="Phone"
-              value={phone}
-              onChangeText={setPhone}
+              value={profile.phone}
+              onChangeText={(text) => setProfile({ ...profile, phone: text })}
               placeholder="Enter your phone number"
               keyboardType="phone-pad"
               style={styles.input}
@@ -136,7 +136,7 @@ export default function ProfileScreen() {
             />
             <Input
               label="Constituency"
-              value={constituency}
+              value={profile.constituency?.name || "Not set"}
               onChangeText={() => {}}
               style={
                 {
@@ -149,7 +149,7 @@ export default function ProfileScreen() {
             />
             <Input
               label="Region"
-              value={region}
+              value={profile.region?.name || "Not set"}
               onChangeText={() => {}}
               style={
                 {
@@ -169,21 +169,27 @@ export default function ProfileScreen() {
             <ThemedView style={styles.switchContainer}>
               <ThemedText>Email Notifications</ThemedText>
               <Switch
-                value={emailNotifications}
-                onValueChange={setEmailNotifications}
+                value={profile.email_notifications}
+                onValueChange={(value) =>
+                  setProfile({ ...profile, email_notifications: value })
+                }
                 trackColor={{ false: colors.border, true: colors.primary }}
                 thumbColor={
-                  emailNotifications ? colors.background : colors.text
+                  profile.email_notifications ? colors.background : colors.text
                 }
               />
             </ThemedView>
             <ThemedView style={styles.switchContainer}>
               <ThemedText>Push Notifications</ThemedText>
               <Switch
-                value={pushNotifications}
-                onValueChange={setPushNotifications}
+                value={profile.push_notifications}
+                onValueChange={(value) =>
+                  setProfile({ ...profile, push_notifications: value })
+                }
                 trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={pushNotifications ? colors.background : colors.text}
+                thumbColor={
+                  profile.push_notifications ? colors.background : colors.text
+                }
               />
             </ThemedView>
           </ThemedView>

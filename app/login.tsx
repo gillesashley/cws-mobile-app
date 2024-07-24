@@ -1,17 +1,22 @@
+import axios from "axios";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { ThemedText } from "@/components/ThemedText";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { useAuthContext } from "@/components/AuthProvider";
+import { ThemedText } from "@/components/ThemedText";
+import { API_BASE_URL } from "@/config/api";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,6 +29,8 @@ export default function Login() {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "tint");
+  const surfaceColor = useThemeColor({}, "surface");
+  const placeholderColor = useThemeColor({}, "placeholder");
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -34,15 +41,37 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-      if (success) {
-        router.replace("/(tabs)/home");
+      console.log("Attempting login with email:", email);
+      const response = await axios.post(`${API_BASE_URL}/login`, {
+        email,
+        password,
+      });
+
+      console.log("Login response:", response.data);
+
+      if (response.data.token && response.data.user) {
+        // Call the login function from AuthContext
+        const loginResult = await login(
+          response.data.user,
+          response.data.token
+        );
+        if (loginResult) {
+          router.replace("/(tabs)/home");
+        } else {
+          Alert.alert("Error", "Failed to save login information");
+        }
       } else {
-        Alert.alert("Login Failed", "Invalid email or password");
+        Alert.alert("Error", "Invalid response from server");
       }
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Error", "An unexpected error occurred");
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          error.response.data.message || "An unknown error occurred";
+        Alert.alert("Login Failed", errorMessage);
+      } else {
+        Alert.alert("Login Failed", "An unexpected error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -50,33 +79,63 @@ export default function Login() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
-      <ThemedText style={styles.title}>Login</ThemedText>
-      <TextInput
-        style={[styles.input, { color: textColor, borderColor: textColor }]}
-        placeholder="Email"
-        placeholderTextColor={textColor}
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={[styles.input, { color: textColor, borderColor: textColor }]}
-        placeholder="Password"
-        placeholderTextColor={textColor}
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: primaryColor }]}
-        onPress={handleLogin}
-        disabled={isLoading}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.keyboardAvoidingView}
       >
-        <ThemedText style={styles.buttonText}>
-          {isLoading ? "Logging in..." : "Login"}
-        </ThemedText>
-      </TouchableOpacity>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+          />
+        </View>
+        <ThemedText style={styles.title}>Welcome Back!</ThemedText>
+        <View style={styles.formContainer}>
+          <View
+            style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
+          >
+            <TextInput
+              style={[styles.input, { color: textColor }]}
+              placeholder="Email"
+              placeholderTextColor={placeholderColor}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
+          <View
+            style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
+          >
+            <TextInput
+              style={[styles.input, { color: textColor }]}
+              placeholder="Password"
+              placeholderTextColor={placeholderColor}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+            />
+          </View>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: primaryColor }]}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <ThemedText style={styles.buttonText}>
+              {isLoading ? "Logging in..." : "Log In"}
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            /* Handle forgot password */
+          }}
+        >
+          <ThemedText style={styles.forgotPassword}>
+            Forgot Password?
+          </ThemedText>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -84,31 +143,58 @@ export default function Login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    justifyContent: "flex-start", // Changed from "center"
+    alignItems: "center",
     padding: 20,
+    paddingTop: 60, // Add top padding
+  },
+  logoContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 30,
     textAlign: "center",
+    marginTop: 20,
+  },
+  formContainer: {
+    width: "100%",
+    maxWidth: 300,
+  },
+  inputContainer: {
+    borderRadius: 10,
+    marginBottom: 15,
+    overflow: "hidden",
   },
   input: {
-    height: 40,
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    height: 50,
+    paddingHorizontal: 15,
   },
   button: {
-    height: 40,
-    borderRadius: 5,
+    height: 50,
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 20,
   },
   buttonText: {
     color: "white",
+    fontSize: 16,
     fontWeight: "bold",
+  },
+  forgotPassword: {
+    marginTop: 20,
+    textAlign: "center",
+    textDecorationLine: "underline",
   },
 });

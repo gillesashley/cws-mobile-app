@@ -12,6 +12,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -27,7 +28,7 @@ import {
   fetchConstituencies,
   fetchRegions,
   Region,
-} from "@/services/regionService";
+} from "@/services/services";
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -223,6 +224,12 @@ export default function Register() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+          />
+        </View>
         <ThemedText style={styles.title}>Register</ThemedText>
         <Input
           label="Name"
@@ -338,6 +345,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+  },
+  logoContainer: {
+    marginBottom: 20,
+    alignItems: "center",
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    resizeMode: "contain",
   },
   title: {
     fontSize: 24,
