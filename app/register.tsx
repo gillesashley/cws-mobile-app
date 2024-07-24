@@ -45,6 +45,7 @@ export default function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
+  const [area, setArea] = useState("");
 
   const { register } = useAuthContext();
   const router = useRouter();
@@ -171,6 +172,7 @@ export default function Register() {
       formData.append("ghana_card_id", ghanaCardId);
       formData.append("region_id", regionId);
       formData.append("constituency_id", constituencyId);
+      formData.append("area", area);
       formData.append("role", "user");
 
       if (ghanaCardImage) {
@@ -326,6 +328,12 @@ export default function Register() {
             />
           ))}
         </Picker>
+        <Input
+          label="Area"
+          value={area}
+          onChangeText={setArea}
+          placeholder="Enter your area"
+        />
         <Button
           title={isLoading ? "Registering..." : "Register"}
           onPress={handleRegister}

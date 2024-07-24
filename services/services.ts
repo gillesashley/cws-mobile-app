@@ -18,6 +18,7 @@ export interface UserProfile {
   email: string;
   phone: string;
   constituency: Constituency | null;
+  area: string;
   region: Region | null;
   email_notifications: boolean;
   push_notifications: boolean;

@@ -27,6 +27,7 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [area, setArea] = useState(profile?.area || "");
 
   const { user, logout } = useAuthContext();
   const router = useRouter();
@@ -117,6 +118,7 @@ export default function ProfileScreen() {
           name: profile?.name,
           email: profile?.email,
           phone: profile?.phone,
+          area: profile?.area,
           email_notifications: profile?.email_notifications,
           push_notifications: profile?.push_notifications,
         },
@@ -198,6 +200,14 @@ export default function ProfileScreen() {
               }
               labelStyle={styles.inputLabel as TextStyle}
               editable={false}
+            />
+            <Input
+              label="Area"
+              value={area}
+              onChangeText={(text) => setArea(text)}
+              placeholder="Enter your area"
+              style={styles.input}
+              labelStyle={styles.inputLabel}
             />
             <Input
               label="Region"
