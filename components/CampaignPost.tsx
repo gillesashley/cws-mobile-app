@@ -4,6 +4,7 @@ import { API_BASE_URL } from "@/config/api";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
@@ -46,6 +47,7 @@ export function CampaignPost({
   const [isLiked, setIsLiked] = useState(false);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
   const { user, token } = useAuthContext();
+  const router = useRouter();
 
   const backgroundColor = useThemeColor(
     { light: "#FFFFFF", dark: "#2C2C2C" },
@@ -56,6 +58,13 @@ export function CampaignPost({
     { light: "#757575", dark: "#A0A0A0" },
     "text"
   );
+
+  const handleReadMore = () => {
+    router.push({
+      pathname: "/full-post",
+      params: { id, title, description, imageUrl, likes, shares, shareableUrl },
+    });
+  };
 
   const handleLike = async () => {
     try {
@@ -164,7 +173,16 @@ export function CampaignPost({
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.contentContainer}>
         <ThemedText style={styles.title}>{title}</ThemedText>
-        <ThemedText style={styles.description}>{description}</ThemedText>
+        <ThemedText
+          style={styles.description}
+          numberOfLines={4}
+          ellipsizeMode="tail"
+        >
+          {description}
+        </ThemedText>
+        <TouchableOpacity onPress={handleReadMore}>
+          <ThemedText style={styles.readMore}>Read More</ThemedText>
+        </TouchableOpacity>
         <View style={styles.statsContainer}>
           <LikeButton
             postId={id}
@@ -248,6 +266,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  readMore: {
+    color: "#5C4DFF",
+    fontWeight: "bold",
+    marginBottom: 12,
   },
   description: {
     fontSize: 14,

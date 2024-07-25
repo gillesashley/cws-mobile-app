@@ -15,6 +15,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: FormData) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateUser: (userData: Partial<any>) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -97,6 +98,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateUser = async (userData: Partial<any>) => {
+    try {
+      const updatedUser = { ...authState.user, ...userData };
+      await saveAuthState({ ...authState, user: updatedUser });
+      return true;
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return false;
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await axios.post(`${API_BASE_URL}/logout`);
@@ -117,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     register,
     logout,
+    updateUser,
   };
 
   return (

@@ -97,7 +97,7 @@ export default function HomeScreen() {
                 id={item.id}
                 title={item.title}
                 description={item.content}
-                imageUrl="https://via.placeholder.com/150" // You might want to add an image field to your campaign messages
+                imageUrl={item.image_url}
                 likes={item.likes_count}
                 shares={item.shares_count}
                 shareableUrl={item.shareable_url}

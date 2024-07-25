@@ -41,7 +41,7 @@ export default function ShareButton({
 
         const response = await axios.post(
           `${API_BASE_URL}/campaign-messages/${postId}/share`,
-          { platform: "other" }, // Make sure this matches the expected format
+          { platform: "other" }, 
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

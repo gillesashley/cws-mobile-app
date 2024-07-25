@@ -34,6 +34,7 @@ export interface CampaignMessage {
   likes_count: number;
   shares_count: number;
   reads: number;
+  image_url: string;
   shareable_url: string;
 }
 
