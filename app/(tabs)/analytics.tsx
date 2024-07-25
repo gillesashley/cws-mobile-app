@@ -136,7 +136,7 @@ function AnalyticsScreen() {
           <View style={styles.gridContainer}>
             <View style={styles.gridItem}>
               <StatisticCard
-                title="Total Followers"
+                title="Total Posts Shared"
                 value={analyticsData.postsShared}
                 change={analyticsData.postsSharedChange}
               />
@@ -157,7 +157,7 @@ function AnalyticsScreen() {
             </View>
             <View style={styles.gridItem}>
               <StatisticCard
-                title="Total Comment"
+                title="Total Points"
                 value={Number(analyticsData.totalPoints)}
                 change={analyticsData.totalPointsChange}
               />
