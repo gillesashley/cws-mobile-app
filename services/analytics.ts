@@ -8,16 +8,16 @@ export interface AnalyticsData {
   postLikesChange: number;
   postsRead: number;
   postsReadChange: number;
-  totalPoints: number;
+  totalPoints: number | string;
   totalPointsChange: number;
+  overviewData: number[];
   popularPost: {
     title: string;
     reads: number;
     likes: number;
     shares: number;
-    imageUrl: string;
+    imageUrl: string | null;
   };
-  overviewData: number[];
 }
 
 export const fetchAnalyticsData = async (

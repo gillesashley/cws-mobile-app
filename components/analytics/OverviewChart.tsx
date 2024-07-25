@@ -20,6 +20,15 @@ export const OverviewChart: React.FC<OverviewChartProps> = ({ data }) => {
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
 
+  if (data.datasets[0].data.length === 0) {
+    return (
+      <ThemedView style={[styles.container, { backgroundColor }]}>
+        <ThemedText style={styles.title}>Overview</ThemedText>
+        <ThemedText>No data available for the overview chart.</ThemedText>
+      </ThemedView>
+    );
+  }
+
   return (
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ThemedText style={styles.title}>Overview</ThemedText>

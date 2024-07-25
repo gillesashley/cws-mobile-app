@@ -22,7 +22,8 @@ function isValidAnalyticsData(data: any): data is AnalyticsData {
     typeof data.postLikesChange === "number" &&
     typeof data.postsRead === "number" &&
     typeof data.postsReadChange === "number" &&
-    typeof data.totalPoints === "number" &&
+    (typeof data.totalPoints === "number" ||
+      typeof data.totalPoints === "string") &&
     typeof data.totalPointsChange === "number" &&
     Array.isArray(data.overviewData) &&
     typeof data.popularPost === "object" &&
@@ -30,7 +31,9 @@ function isValidAnalyticsData(data: any): data is AnalyticsData {
     typeof data.popularPost.title === "string" &&
     typeof data.popularPost.reads === "number" &&
     typeof data.popularPost.likes === "number" &&
-    typeof data.popularPost.shares === "number"
+    typeof data.popularPost.shares === "number" &&
+    (data.popularPost.imageUrl === null ||
+      typeof data.popularPost.imageUrl === "string")
   );
 }
 
@@ -141,7 +144,7 @@ function AnalyticsScreen() {
           />
           <StatisticCard
             title="Total Points"
-            value={analyticsData.totalPoints}
+            value={Number(analyticsData.totalPoints)}
             change={analyticsData.totalPointsChange}
           />
           <UserActivityBreakdown
@@ -154,7 +157,7 @@ function AnalyticsScreen() {
             views={analyticsData.popularPost.reads}
             likes={analyticsData.popularPost.likes}
             shares={analyticsData.popularPost.shares}
-            imageUrl={analyticsData.popularPost.imageUrl}
+            imageUrl={analyticsData.popularPost.imageUrl || undefined}
           />
           <OverviewChart
             data={{

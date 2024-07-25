@@ -1,15 +1,15 @@
-import React from 'react';
-import { StyleSheet, Image } from 'react-native';
-import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import React from "react";
+import { Image, StyleSheet } from "react-native";
 
 interface PopularPostCardProps {
   title: string;
   views: number;
   likes: number;
   shares: number;
-  imageUrl: string;
+  imageUrl?: string;
 }
 
 export const PopularPostCard: React.FC<PopularPostCardProps> = ({
@@ -26,14 +26,26 @@ export const PopularPostCard: React.FC<PopularPostCardProps> = ({
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ThemedText style={styles.title}>Most Popular Post</ThemedText>
       <ThemedView style={styles.postContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
+        {imageUrl ? (
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+        ) : (
+          <ThemedView
+            style={[styles.image, { backgroundColor: "lightgray" }]}
+          />
+        )}
         <ThemedView style={styles.infoContainer}>
           <ThemedText style={styles.postTitle} numberOfLines={2}>
             {title}
           </ThemedText>
-          <ThemedText style={styles.stats}>Views: {views.toLocaleString()}</ThemedText>
-          <ThemedText style={styles.stats}>Likes: {likes.toLocaleString()}</ThemedText>
-          <ThemedText style={styles.stats}>Shares: {shares.toLocaleString()}</ThemedText>
+          <ThemedText style={styles.stats}>
+            Views: {views.toLocaleString()}
+          </ThemedText>
+          <ThemedText style={styles.stats}>
+            Likes: {likes.toLocaleString()}
+          </ThemedText>
+          <ThemedText style={styles.stats}>
+            Shares: {shares.toLocaleString()}
+          </ThemedText>
         </ThemedView>
       </ThemedView>
     </ThemedView>
@@ -48,11 +60,11 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 12,
   },
   postContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   image: {
     width: 80,
@@ -65,7 +77,7 @@ const styles = StyleSheet.create({
   },
   postTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 4,
   },
   stats: {
