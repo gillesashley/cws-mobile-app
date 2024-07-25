@@ -49,16 +49,20 @@ export default function LikeButton({
   const handleLike = useCallback(
     debounce(async () => {
       if (isLiked) {
-        // If already liked, don't do anything
         return;
       }
 
       try {
+        console.log("Attempting to like post:", postId);
+        console.log("Token:", token);
+
         const response = await axios.post(
           `${API_BASE_URL}/campaign-messages/${postId}/like`,
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
+        console.log("Like response:", response.data);
 
         if (response.status === 201) {
           setIsLiked(true);
@@ -70,13 +74,14 @@ export default function LikeButton({
       } catch (error) {
         console.error("Error liking post:", error);
         if (axios.isAxiosError(error)) {
+          console.error("Error response data:", error.response?.data);
+          console.error("Error response status:", error.response?.status);
           if (error.response?.status === 401) {
             Alert.alert(
               "Authentication Error",
               "Please log in again to like this post."
             );
           } else if (error.response?.status === 400) {
-            // Already liked
             setIsLiked(true);
           } else if (error.response?.data?.message) {
             Alert.alert("Error", error.response.data.message);
@@ -93,7 +98,6 @@ export default function LikeButton({
     }, 300),
     [postId, isLiked, token]
   );
-
   return (
     <TouchableOpacity style={styles.statItem} onPress={handleLike}>
       <Ionicons
