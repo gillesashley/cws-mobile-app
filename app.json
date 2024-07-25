@@ -40,6 +40,20 @@
       "eas": {
         "projectId": "ed464a28-e808-4913-92a1-b45178733881"
       }
-    }
+    },
+    "fonts": [
+      {
+        "asset": "assets/fonts/Poppins-Bold.ttf"
+      },
+      {
+        "asset": "assets/fonts/Poppins-Regular.ttf"
+      },
+      {
+        "asset": "assets/fonts/Poppins-Italic.ttf"
+      },
+      {
+        "asset": "assets/fonts/Poppins-SemiBold.ttf"
+      }
+    ]
   }
 }

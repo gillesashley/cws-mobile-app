@@ -12,7 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthContext } from "@/components/AuthProvider";
 import PointsBalance from "@/components/points-payments/PointBalance";
 import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
-import WithdrawalHistory from "@/components/points-payments/WithdrawalHistory";
+import WithdrawalHistoryItem from "@/components/points-payments/WithdrawalHistoryItem";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/ui/Button";
@@ -127,9 +127,11 @@ export default function PointsPaymentScreen() {
           isSubmitting={isSubmitting}
         />
       )}
-      <ThemedText type="subtitle" style={styles.historyTitle}>
-        Withdrawal History
-      </ThemedText>
+      {pointsData && pointsData.withdrawalHistory.length > 0 && (
+        <ThemedText type="subtitle" style={styles.historyTitle}>
+          Withdrawal History
+        </ThemedText>
+      )}
     </View>
   );
 
@@ -163,13 +165,15 @@ export default function PointsPaymentScreen() {
     >
       <FlatList
         data={pointsData?.withdrawalHistory || []}
-        renderItem={({ item }) => <WithdrawalHistory withdrawals={[item]} />}
+        renderItem={({ item }) => <WithdrawalHistoryItem withdrawal={item} />}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={ListHeader}
         ListEmptyComponent={
-          <ThemedText style={styles.emptyText}>
-            No withdrawal history
-          </ThemedText>
+          !isLoading && (
+            <ThemedText style={styles.emptyText}>
+              No withdrawal history
+            </ThemedText>
+          )
         }
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

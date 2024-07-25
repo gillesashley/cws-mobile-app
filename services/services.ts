@@ -111,7 +111,33 @@ export const fetchPointsData = async (token: string): Promise<PointsData> => {
     const response = await axios.get(`${API_BASE_URL}/points`, {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return response.data;
+    const data = response.data;
+
+    // Define the type for withdrawal history items
+    interface WithdrawalHistoryItem {
+      id: number;
+      amount: number;
+      status: string;
+      created_at: string;
+    }
+
+    // Validate and sanitize the data
+    const sanitizedData: PointsData = {
+      balance: typeof data.balance === "number" ? data.balance : 0,
+      withdrawalHistory: Array.isArray(data.withdrawalHistory)
+        ? data.withdrawalHistory.map((item: WithdrawalHistoryItem) => ({
+            id: item.id || 0,
+            amount:
+              typeof item.amount === "number"
+                ? item.amount
+                : parseFloat(item.amount) || 0,
+            status: item.status || "Unknown",
+            created_at: item.created_at || new Date().toISOString(),
+          }))
+        : [],
+    };
+
+    return sanitizedData;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 404) {
