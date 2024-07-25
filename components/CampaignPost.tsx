@@ -16,6 +16,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import LikeButton from "./LikeButton";
+import ShareButton from "./ShareButton";
 
 interface CampaignPostProps {
   id: string;
@@ -43,7 +45,7 @@ export function CampaignPost({
   const [shares, setShares] = useState(initialShares);
   const [isLiked, setIsLiked] = useState(false);
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
-  const { user } = useAuthContext();
+  const { user, token } = useAuthContext();
 
   const backgroundColor = useThemeColor(
     { light: "#FFFFFF", dark: "#2C2C2C" },
@@ -57,14 +59,18 @@ export function CampaignPost({
 
   const handleLike = async () => {
     try {
+      console.log("Attempting to like post:", id);
+      console.log("Token when liking:", token);
+
       const response = await axios.post(
         `${API_BASE_URL}/campaign-messages/${id}/like`,
         {},
         {
-          headers: { Authorization: `Bearer ${user.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setLikes(likes + 1);
+      console.log("Like response:", response.data);
+      setLikes((prevLikes) => prevLikes + 1);
       setIsLiked(true);
       Alert.alert(
         "Success",
@@ -72,12 +78,19 @@ export function CampaignPost({
       );
     } catch (error) {
       console.error("Error liking post:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      }
       Alert.alert("Error", "Failed to like the post. Please try again.");
     }
   };
 
   const handleShare = async (platform: string) => {
     try {
+      console.log("Token when sharing:", token);
+
       let url = "";
       let message = `Check out this campaign: ${shareableUrl}`;
 
@@ -112,11 +125,9 @@ export function CampaignPost({
       // After successful share, update the backend
       const response = await axios.post(
         `${API_BASE_URL}/campaign-messages/${id}/share`,
+        { platform },
         {
-          platform,
-        },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
       setShares(shares + 1);
@@ -127,8 +138,27 @@ export function CampaignPost({
       );
     } catch (error) {
       console.error("Error sharing post:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Error response:", error.response.data);
+        console.error("Error status:", error.response.status);
+        console.error("Error response headers:", error.response.headers);
+      }
       Alert.alert("Error", "Failed to share the post. Please try again.");
     }
+  };
+
+  const handleLikeSuccess = (pointsAwarded: number) => {
+    Alert.alert(
+      "Success",
+      `You earned ${pointsAwarded} points for liking this post!`
+    );
+  };
+
+  const handleShareSuccess = (pointsAwarded: number) => {
+    Alert.alert(
+      "Success",
+      `You earned ${pointsAwarded} points for sharing this post!`
+    );
   };
 
   return (
@@ -138,21 +168,18 @@ export function CampaignPost({
         <ThemedText style={styles.title}>{title}</ThemedText>
         <ThemedText style={styles.description}>{description}</ThemedText>
         <View style={styles.statsContainer}>
-          <TouchableOpacity style={styles.statItem} onPress={handleLike}>
-            <Ionicons
-              name={isLiked ? "heart" : "heart-outline"}
-              size={20}
-              color={isLiked ? "red" : iconColor}
-            />
-            <ThemedText style={styles.statText}>{likes}</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.statItem}
-            onPress={() => setIsShareModalVisible(true)}
-          >
-            <Ionicons name="share-social-outline" size={20} color={iconColor} />
-            <ThemedText style={styles.statText}>{shares}</ThemedText>
-          </TouchableOpacity>
+          <LikeButton
+            postId={id}
+            initialLikes={likes}
+            onLikeSuccess={handleLikeSuccess}
+          />
+          <ShareButton
+            postId={id}
+            shares={shares}
+            shareableUrl={shareableUrl}
+            title={title}
+            onShareSuccess={handleShareSuccess}
+          />
         </View>
       </View>
 

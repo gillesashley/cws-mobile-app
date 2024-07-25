@@ -29,6 +29,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loadAuthState();
   }, []);
 
+  useEffect(() => {
+    if (authState.token) {
+      setAxiosDefaultHeaders(authState.token);
+    }
+  }, [authState.token]);
+
   const loadAuthState = async () => {
     try {
       const storedAuthState = await AsyncStorage.getItem("authState");
@@ -67,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       const { token, user } = response.data;
-      await saveAuthState({ token, user });
+      await saveAuthState({ token, user: { ...user, token } });
       return true;
     } catch (error) {
       console.error("Login error:", error);
