@@ -32,6 +32,7 @@ export const fetchAnalyticsData = async (
         },
       }
     );
+    console.log("Received analytics data:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching analytics data:", error);

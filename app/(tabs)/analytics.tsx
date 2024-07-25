@@ -4,6 +4,7 @@ import { PopularPostCard } from "@/components/analytics/PopularPostCard";
 import { StatisticCard } from "@/components/analytics/StatisticsCard";
 import { UserActivityBreakdown } from "@/components/analytics/UserActivityBreakdown";
 import { useAuthContext } from "@/components/AuthProvider";
+import { ExpoErrorBoundary } from "@/components/ErrorBoundary";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -12,7 +13,28 @@ import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function AnalyticsScreen() {
+function isValidAnalyticsData(data: any): data is AnalyticsData {
+  return (
+    data &&
+    typeof data.postsShared === "number" &&
+    typeof data.postsSharedChange === "number" &&
+    typeof data.postLikes === "number" &&
+    typeof data.postLikesChange === "number" &&
+    typeof data.postsRead === "number" &&
+    typeof data.postsReadChange === "number" &&
+    typeof data.totalPoints === "number" &&
+    typeof data.totalPointsChange === "number" &&
+    Array.isArray(data.overviewData) &&
+    typeof data.popularPost === "object" &&
+    data.popularPost !== null &&
+    typeof data.popularPost.title === "string" &&
+    typeof data.popularPost.reads === "number" &&
+    typeof data.popularPost.likes === "number" &&
+    typeof data.popularPost.shares === "number"
+  );
+}
+
+function AnalyticsScreen() {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
@@ -25,7 +47,9 @@ export default function AnalyticsScreen() {
 
   useEffect(() => {
     const loadAnalyticsData = async () => {
+      console.log("Loading analytics data...");
       if (!token) {
+        console.log("No token found");
         setError("You must be logged in to view analytics.");
         setIsLoading(false);
         return;
@@ -33,9 +57,17 @@ export default function AnalyticsScreen() {
 
       try {
         setIsLoading(true);
+        console.log("Fetching analytics data...");
         const data = await fetchAnalyticsData(token);
-        setAnalyticsData(data);
-        setError(null);
+        console.log("Fetched data:", JSON.stringify(data, null, 2));
+
+        if (isValidAnalyticsData(data)) {
+          setAnalyticsData(data);
+          setError(null);
+        } else {
+          console.error("Invalid analytics data structure:", data);
+          setError("Received invalid data structure from the server.");
+        }
       } catch (err) {
         console.error("Error fetching analytics data:", err);
         setError("Failed to load analytics data. Please try again.");
@@ -77,6 +109,12 @@ export default function AnalyticsScreen() {
       </SafeAreaView>
     );
   }
+
+  console.log("Rendering AnalyticsScreen", {
+    isLoading,
+    error,
+    analyticsData: "Data present",
+  });
 
   return (
     <SafeAreaView
@@ -144,3 +182,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
 });
+
+export default function AnalyticsScreenWithErrorBoundary() {
+  return (
+    <ExpoErrorBoundary>
+      <AnalyticsScreen />
+    </ExpoErrorBoundary>
+  );
+}

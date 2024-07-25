@@ -11,6 +11,11 @@ export default function TabLayout() {
   const colorScheme = "light";
   const backgroundColor = useThemeColor({}, "background");
 
+  React.useEffect(() => {
+    console.log("Tab Layout mounted");
+    return () => console.log("Tab Layout unmounted");
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -62,6 +67,11 @@ export default function TabLayout() {
               color={color}
             />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            console.log("Analytics tab pressed");
+          },
         }}
       />
       <Tabs.Screen
