@@ -22,7 +22,10 @@ const WithdrawalHistory: React.FC<WithdrawalHistoryProps> = ({
     item: WithdrawalHistoryProps["withdrawals"][0];
   }) => (
     <ThemedView style={styles.historyItem}>
-      <ThemedText>Amount: ₵{item.amount.toFixed(2)}</ThemedText>
+      <ThemedText>
+        Amount:{" "}
+        {item.amount !== undefined ? `₵${item.amount.toFixed(2)}` : "N/A"}
+      </ThemedText>
       <WithdrawalStatusBadge status={item.status} />
       <ThemedText>
         Date: {new Date(item.created_at).toLocaleDateString()}

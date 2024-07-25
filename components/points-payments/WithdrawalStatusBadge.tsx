@@ -1,36 +1,38 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
 import { ThemedText } from "@/components/ThemedText";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 
 interface WithdrawalStatusBadgeProps {
   status: string;
 }
 
-const WithdrawalStatusBadge: React.FC<WithdrawalStatusBadgeProps> = ({ status }) => {
+const WithdrawalStatusBadge: React.FC<WithdrawalStatusBadgeProps> = ({
+  status,
+}) => {
   const getStatusColor = () => {
     switch (status.toLowerCase()) {
-      case 'approved':
-        return '#34C759';
-      case 'pending':
-        return '#FF9500';
-      case 'rejected':
-        return '#FF3B30';
+      case "approved":
+        return "#34C759";
+      case "pending":
+        return "#FF9500";
+      case "rejected":
+        return "#FF3B30";
       default:
-        return '#8E8E93';
+        return "#8E8E93";
     }
   };
 
   const getStatusIcon = () => {
     switch (status.toLowerCase()) {
-      case 'approved':
-        return 'checkmark-circle';
-      case 'pending':
-        return 'time';
-      case 'rejected':
-        return 'close-circle';
+      case "approved":
+        return "checkmark-circle";
+      case "pending":
+        return "time";
+      case "rejected":
+        return "close-circle";
       default:
-        return 'help-circle';
+        return "help-circle";
     }
   };
 
@@ -44,17 +46,17 @@ const WithdrawalStatusBadge: React.FC<WithdrawalStatusBadgeProps> = ({ status })
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   text: {
-    color: 'white',
+    color: "white",
     marginLeft: 4,
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

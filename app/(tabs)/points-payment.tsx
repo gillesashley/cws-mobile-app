@@ -1,16 +1,26 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { ScrollView, StyleSheet, Alert, RefreshControl, ActivityIndicator } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuthContext } from "@/components/AuthProvider";
+import PointsBalance from "@/components/points-payments/PointBalance";
+import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
+import WithdrawalHistory from "@/components/points-payments/WithdrawalHistory";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/ui/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { useAuthContext } from "@/components/AuthProvider";
-import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
-import PointsBalance from "@/components/points-payments/PointBalance";
-import WithdrawalHistory from "@/components/points-payments/WithdrawalHistory";
-import { fetchPointsData, submitWithdrawalRequest, PointsData } from "@/services/services";
+import {
+  fetchPointsData,
+  PointsData,
+  submitWithdrawalRequest,
+} from "@/services/services";
 
 export default function PointsPaymentScreen() {
   const [pointsData, setPointsData] = useState<PointsData | null>(null);
@@ -34,7 +44,21 @@ export default function PointsPaymentScreen() {
       setIsLoading(true);
       setError(null);
       const data = await fetchPointsData(token);
-      setPointsData(data);
+
+      // Validate and sanitize the data
+      const sanitizedData: PointsData = {
+        balance: typeof data.balance === "number" ? data.balance : 0,
+        withdrawalHistory: Array.isArray(data.withdrawalHistory)
+          ? data.withdrawalHistory.map((item) => ({
+              id: item.id || 0,
+              amount: typeof item.amount === "number" ? item.amount : 0,
+              status: item.status || "Unknown",
+              created_at: item.created_at || new Date().toISOString(),
+            }))
+          : [],
+      };
+
+      setPointsData(sanitizedData);
     } catch (error) {
       console.error("Error fetching points data:", error);
       if (error instanceof Error) {
@@ -96,15 +120,21 @@ export default function PointsPaymentScreen() {
         <ThemedView style={styles.content}>
           <ThemedText type="title">Points & Payments</ThemedText>
           <ThemedText style={styles.errorText}>{error}</ThemedText>
-          <ThemedText>We're working on bringing this feature to you soon. Please check back later.</ThemedText>
+          <ThemedText>
+            We're working on bringing this feature to you soon. Please check
+            back later.
+          </ThemedText>
         </ThemedView>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
-      <ScrollView 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor }]}
+      edges={["top"]}
+    >
+      <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -134,7 +164,9 @@ export default function PointsPaymentScreen() {
             />
           )}
 
-          {pointsData && <WithdrawalHistory withdrawals={pointsData.withdrawalHistory} />}
+          {pointsData && (
+            <WithdrawalHistory withdrawals={pointsData.withdrawalHistory} />
+          )}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
@@ -155,7 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorText: {
-    color: 'red',
+    color: "red",
     marginBottom: 16,
   },
 });
