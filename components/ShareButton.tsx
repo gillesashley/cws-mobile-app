@@ -32,8 +32,7 @@ export default function ShareButton({
   const handleShare = async () => {
     try {
       const result = await Share.share({
-        message: `Check out this campaign: ${title}`,
-        url: shareableUrl,
+        message: `Check out this campaign: ${shareableUrl}`,
       });
 
       if (result.action === Share.sharedAction) {
@@ -42,7 +41,7 @@ export default function ShareButton({
 
         const response = await axios.post(
           `${API_BASE_URL}/campaign-messages/${postId}/share`,
-          { platform: "other" },
+          { platform: "other" }, // Make sure this matches the expected format
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -51,7 +50,7 @@ export default function ShareButton({
     } catch (error) {
       console.error("Error sharing post:", error);
       // Revert optimistic update on error
-      setShareCount(shareCount);
+      setShareCount(shares);
       Alert.alert("Error", "Failed to share the post. Please try again.");
     }
   };

@@ -29,8 +29,10 @@ export default function LikeButton({
   );
 
   useEffect(() => {
-    fetchLikeStatus();
-  }, []);
+    if (token) {
+      fetchLikeStatus();
+    }
+  }, [token]);
 
   const fetchLikeStatus = async () => {
     try {
@@ -96,8 +98,9 @@ export default function LikeButton({
         }
       }
     }, 300),
-    [postId, isLiked, token]
+    [postId, isLiked, token, onLikeSuccess]
   );
+
   return (
     <TouchableOpacity style={styles.statItem} onPress={handleLike}>
       <Ionicons
