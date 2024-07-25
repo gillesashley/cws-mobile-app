@@ -1,70 +1,86 @@
-import React, { useEffect, useState } from "react";
+// app/(tabs)/home.tsx
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
-  ScrollView,
+  Modal,
   StyleSheet,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuthContext } from "@/components/AuthProvider";
+import { CampaignList } from "@/components/CampaignList";
 import { CampaignPost } from "@/components/CampaignPost";
+import { ErrorView } from "@/components/ErrorView";
+import { Header } from "@/components/Header";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { CampaignMessage, fetchCampaignMessages } from "@/services/services";
+import {
+  CampaignMessage,
+  fetchCampaignMessages,
+  fetchUserBalance,
+} from "@/services/services";
+
+// Define the RootStackParamList if not already defined
+type RootStackParamList = {
+  PointsPayment: undefined;
+  // Add other routes if needed
+};
 
 export default function HomeScreen() {
-  const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>(
-    []
-  );
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userBalance, setUserBalance] = useState<number | null>(null);
+  const [showAllCampaigns, setShowAllCampaigns] = useState(false);
 
   const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
-  const textColor = useThemeColor({}, "text");
+
+  const loadData = useCallback(async () => {
+    if (!token) {
+      setError("You must be logged in to view this content.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const [messages, balance] = await Promise.all([
+        fetchCampaignMessages(token),
+        fetchUserBalance(token),
+      ]);
+      setCampaignMessages(messages);
+      setUserBalance(balance);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError("Failed to load data. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
 
   useEffect(() => {
-    const loadCampaignMessages = async () => {
-      if (!token) {
-        setError("You must be logged in to view campaign messages.");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const messages = await fetchCampaignMessages(token);
-        setCampaignMessages(messages);
-        setError(null);
-      } catch (err) {
-        console.error("Error fetching campaign messages:", err);
-        setError("Failed to load campaign messages. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadCampaignMessages();
-  }, [token]);
+    loadData();
+  }, [loadData]);
 
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ActivityIndicator size="large" color={textColor} />
+        <ActivityIndicator size="large" color={useThemeColor({}, "text")} />
       </SafeAreaView>
     );
   }
 
   if (error) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ThemedText>{error}</ThemedText>
-      </SafeAreaView>
-    );
+    return <ErrorView error={error} onRetry={loadData} />;
   }
 
   return (
@@ -72,42 +88,38 @@ export default function HomeScreen() {
       style={[styles.container, { backgroundColor }]}
       edges={["top"]}
     >
-      <View style={styles.header}>
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={styles.logo}
-        />
-        <ThemedText style={styles.headerTitle}>CWS</ThemedText>
-        <View style={styles.balanceContainer}>
-          <ThemedText style={styles.balanceText}>₵ 0.1346</ThemedText>
-        </View>
-      </View>
-
-      <ScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
+      <Header
+        balance={userBalance}
+        onBalancePress={() => navigation.navigate("PointsPayment")}
+      />
+      <ThemedView style={styles.content}>
+        <View style={styles.sectionHeader}>
           <ThemedText type="subtitle" style={styles.sectionTitle}>
             Latest Campaigns
           </ThemedText>
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={campaignMessages}
-            renderItem={({ item }) => (
-              <CampaignPost
-                id={item.id}
-                title={item.title}
-                description={item.content}
-                imageUrl={item.image_url}
-                likes={item.likes_count}
-                shares={item.shares_count}
-                shareableUrl={item.shareable_url}
-              />
-            )}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.campaignPostsContainer}
-          />
-        </ThemedView>
-      </ScrollView>
+          <TouchableOpacity onPress={() => setShowAllCampaigns(true)}>
+            <ThemedText type="link">See All</ThemedText>
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={campaignMessages.slice(0, 5)}
+          renderItem={({ item }) => <CampaignPost {...item} />}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.campaignPostsContainer}
+        />
+      </ThemedView>
+      <Modal
+        visible={showAllCampaigns}
+        animationType="slide"
+        onRequestClose={() => setShowAllCampaigns(false)}
+      >
+        <CampaignList
+          campaignMessages={campaignMessages}
+          onClose={() => setShowAllCampaigns(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -116,43 +128,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-  },
-  logo: {
-    width: 24,
-    height: 24,
-    marginRight: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  balanceContainer: {
-    marginLeft: "auto",
-    backgroundColor: "#5C4DFF",
-    borderRadius: 16,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-  balanceText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  scrollView: {
-    flex: 1,
-  },
   content: {
     padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginBottom: 16,
   },
   campaignPostsContainer: {
     paddingRight: 16,

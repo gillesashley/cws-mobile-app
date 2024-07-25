@@ -28,14 +28,14 @@ export interface CampaignMessage {
   id: string;
   title: string;
   content: string;
+  image_url: string;
+  likes_count: number;
+  shares_count: number;
+  shareable_url: string;
   user: {
     name: string;
   };
-  likes_count: number;
-  shares_count: number;
   reads: number;
-  image_url: string;
-  shareable_url: string;
 }
 
 export interface PointsData {
@@ -212,5 +212,17 @@ export const submitWithdrawalRequest = async (
         "An unexpected error occurred while submitting the withdrawal request"
       );
     }
+  }
+};
+
+export const fetchUserBalance = async (token: string): Promise<number> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/user-balance`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.balance;
+  } catch (error) {
+    console.error("Error fetching user balance:", error);
+    throw error;
   }
 };
