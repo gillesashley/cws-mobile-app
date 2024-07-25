@@ -34,6 +34,7 @@ export interface CampaignMessage {
   likes_count: number;
   shares_count: number;
   reads: number;
+  shareable_url: string;
 }
 
 export const fetchRegions = async (): Promise<Region[]> => {

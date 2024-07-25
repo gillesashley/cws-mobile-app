@@ -7,8 +7,6 @@ import axios from "axios";
 import React, { useState } from "react";
 import {
   Alert,
-  Dimensions,
-  Image,
   Linking,
   Modal,
   Share,
@@ -17,64 +15,28 @@ import {
   View,
 } from "react-native";
 
-interface CampaignPostProps {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  likes: number;
-  shares: number;
+interface EnhancedShareButtonProps {
+  campaignId: string;
   shareableUrl: string;
+  initialShares: number;
+  onShareSuccess: (newSharesCount: number) => void;
 }
 
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.7;
-
-export function CampaignPost({
-  id,
-  title,
-  description,
-  imageUrl,
-  likes: initialLikes,
-  shares: initialShares,
+export function EnhancedShareButton({
+  campaignId,
   shareableUrl,
-}: CampaignPostProps) {
-  const [likes, setLikes] = useState(initialLikes);
-  const [shares, setShares] = useState(initialShares);
-  const [isLiked, setIsLiked] = useState(false);
+  initialShares,
+  onShareSuccess,
+}: EnhancedShareButtonProps) {
   const [isShareModalVisible, setIsShareModalVisible] = useState(false);
+  const [shares, setShares] = useState(initialShares);
   const { user } = useAuthContext();
 
-  const backgroundColor = useThemeColor(
-    { light: "#FFFFFF", dark: "#2C2C2C" },
-    "background"
-  );
-  const textColor = useThemeColor({}, "text");
+  const backgroundColor = useThemeColor({}, "background");
   const iconColor = useThemeColor(
     { light: "#757575", dark: "#A0A0A0" },
     "text"
   );
-
-  const handleLike = async () => {
-    try {
-      const response = await axios.post(
-        `${API_BASE_URL}/campaign-messages/${id}/like`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-      setLikes(likes + 1);
-      setIsLiked(true);
-      Alert.alert(
-        "Success",
-        `You earned ${response.data.points_awarded} points for liking this post!`
-      );
-    } catch (error) {
-      console.error("Error liking post:", error);
-      Alert.alert("Error", "Failed to like the post. Please try again.");
-    }
-  };
 
   const handleShare = async (platform: string) => {
     try {
@@ -93,7 +55,7 @@ export function CampaignPost({
         case "twitter":
           url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(
             shareableUrl
-          )}&text=${encodeURIComponent(title)}`;
+          )}`;
           break;
       }
 
@@ -111,7 +73,7 @@ export function CampaignPost({
 
       // After successful share, update the backend
       const response = await axios.post(
-        `${API_BASE_URL}/campaign-messages/${id}/share`,
+        `${API_BASE_URL}/campaign-messages/${campaignId}/share`,
         {
           platform,
         },
@@ -119,7 +81,9 @@ export function CampaignPost({
           headers: { Authorization: `Bearer ${user.token}` },
         }
       );
-      setShares(shares + 1);
+      const newSharesCount = shares + 1;
+      setShares(newSharesCount);
+      onShareSuccess(newSharesCount);
       setIsShareModalVisible(false);
       Alert.alert(
         "Success",
@@ -132,29 +96,14 @@ export function CampaignPost({
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
-      <View style={styles.contentContainer}>
-        <ThemedText style={styles.title}>{title}</ThemedText>
-        <ThemedText style={styles.description}>{description}</ThemedText>
-        <View style={styles.statsContainer}>
-          <TouchableOpacity style={styles.statItem} onPress={handleLike}>
-            <Ionicons
-              name={isLiked ? "heart" : "heart-outline"}
-              size={20}
-              color={isLiked ? "red" : iconColor}
-            />
-            <ThemedText style={styles.statText}>{likes}</ThemedText>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.statItem}
-            onPress={() => setIsShareModalVisible(true)}
-          >
-            <Ionicons name="share-social-outline" size={20} color={iconColor} />
-            <ThemedText style={styles.statText}>{shares}</ThemedText>
-          </TouchableOpacity>
-        </View>
-      </View>
+    <>
+      <TouchableOpacity
+        style={styles.statItem}
+        onPress={() => setIsShareModalVisible(true)}
+      >
+        <Ionicons name="share-social-outline" size={20} color={iconColor} />
+        <ThemedText style={styles.statText}>{shares}</ThemedText>
+      </TouchableOpacity>
 
       <Modal
         animationType="slide"
@@ -195,43 +144,11 @@ export function CampaignPost({
           </View>
         </View>
       </Modal>
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: CARD_WIDTH,
-    borderRadius: 16,
-    marginRight: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: "hidden",
-  },
-  image: {
-    width: "100%",
-    height: 150,
-    resizeMode: "cover",
-  },
-  contentContainer: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 14,
-    marginBottom: 12,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-  },
   statItem: {
     flexDirection: "row",
     alignItems: "center",
