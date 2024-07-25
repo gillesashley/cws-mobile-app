@@ -1,15 +1,37 @@
 import { API_BASE_URL } from "@/api/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-export const fetchAnalyticsData = async () => {
+export interface AnalyticsData {
+  postsShared: number;
+  postsSharedChange: number;
+  postLikes: number;
+  postLikesChange: number;
+  postsRead: number;
+  postsReadChange: number;
+  totalPoints: number;
+  totalPointsChange: number;
+  popularPost: {
+    title: string;
+    reads: number;
+    likes: number;
+    shares: number;
+    imageUrl: string;
+  };
+  overviewData: number[];
+}
+
+export const fetchAnalyticsData = async (
+  token: string
+): Promise<AnalyticsData> => {
   try {
-    const token = await AsyncStorage.getItem("userToken");
-    const response = await axios.get(`${API_BASE_URL}/analytics`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get<AnalyticsData>(
+      `${API_BASE_URL}/analytics`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error("Error fetching analytics data:", error);
