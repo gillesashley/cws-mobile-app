@@ -1,6 +1,6 @@
+import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ThemedText } from "@/components/ThemedText";
-import { API_BASE_URL } from "@/config/api";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
@@ -41,7 +41,7 @@ export default function ShareButton({
 
         const response = await axios.post(
           `${API_BASE_URL}/campaign-messages/${postId}/share`,
-          { platform: "other" }, 
+          { platform: "other" },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 

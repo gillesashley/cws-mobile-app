@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ThemedText } from "@/components/ThemedText";
-import { API_BASE_URL } from "@/config/api";
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export default function Login() {

@@ -1,6 +1,6 @@
 // app/services/regionService.ts
 
-import { API_BASE_URL } from "@/config/api";
+import { API_BASE_URL } from "@/api/api";
 import axios from "axios";
 
 export interface Region {
