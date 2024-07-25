@@ -1,19 +1,27 @@
-import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import React, { useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 interface WithdrawalFormProps {
   onSubmit: (amount: number) => void;
   onCancel: () => void;
   maxAmount: number;
+  isSubmitting: boolean;
 }
 
-const WithdrawalForm: React.FC<WithdrawalFormProps> = ({ onSubmit, onCancel, maxAmount }) => {
+const WithdrawalForm: React.FC<WithdrawalFormProps> = ({
+  onSubmit,
+  onCancel,
+  maxAmount,
+  isSubmitting,
+}) => {
   const [amount, setAmount] = useState("");
   const [error, setError] = useState("");
+  const textColor = useThemeColor({}, "text");
 
   const handleSubmit = () => {
     const numAmount = Number(amount);
@@ -38,15 +46,33 @@ const WithdrawalForm: React.FC<WithdrawalFormProps> = ({ onSubmit, onCancel, max
         }}
         keyboardType="numeric"
         placeholder="Enter amount"
+        editable={!isSubmitting}
       />
       {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
       <ThemedText style={styles.maxAmountText}>
         Maximum withdrawal: ₵{maxAmount.toFixed(2)}
       </ThemedText>
       <View style={styles.buttonContainer}>
-        <Button title="Cancel" onPress={onCancel} style={styles.cancelButton} />
-        <Button title="Submit" onPress={handleSubmit} style={styles.submitButton} />
+        <Button
+          title="Cancel"
+          onPress={onCancel}
+          style={styles.cancelButton}
+          disabled={isSubmitting}
+        />
+        <Button
+          title={isSubmitting ? "Submitting..." : "Submit"}
+          onPress={handleSubmit}
+          style={styles.submitButton}
+          disabled={isSubmitting}
+        />
       </View>
+      {isSubmitting && (
+        <ActivityIndicator
+          size="small"
+          color={textColor}
+          style={styles.loader}
+        />
+      )}
     </ThemedView>
   );
 };
@@ -78,6 +104,9 @@ const styles = StyleSheet.create({
   submitButton: {
     flex: 1,
     marginLeft: 8,
+  },
+  loader: {
+    marginTop: 16,
   },
 });
 

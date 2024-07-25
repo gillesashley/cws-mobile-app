@@ -1,37 +1,53 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { ScrollView, StyleSheet, View, Alert, RefreshControl } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuthContext } from "@/components/AuthProvider";
+import PointsBalance from "@/components/points-payments/PointBalance";
+import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
+import WithdrawalHistory from "@/components/points-payments/WithdrawalHistory";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/ui/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { useAuthContext } from "@/components/AuthProvider";
-import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
-import { fetchPointsData, submitWithdrawalRequest, PointsData } from "@/services/services";
+import {
+  fetchPointsData,
+  PointsData,
+  submitWithdrawalRequest,
+} from "@/services/services";
 
 export default function PointsPaymentScreen() {
   const [pointsData, setPointsData] = useState<PointsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
 
   const fetchData = useCallback(async () => {
     if (!token) {
-      Alert.alert("Error", "You must be logged in to view this page");
+      setError("You must be logged in to view this page");
+      setIsLoading(false);
       return;
     }
 
     try {
       setIsLoading(true);
+      setError(null);
       const data = await fetchPointsData(token);
       setPointsData(data);
     } catch (error) {
       console.error("Error fetching points data:", error);
-      Alert.alert("Error", "Failed to load points data");
+      setError("Failed to load points data. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -49,32 +65,39 @@ export default function PointsPaymentScreen() {
 
   const handleWithdrawalRequest = async (amount: number) => {
     if (!token) {
-      Alert.alert("Error", "You must be logged in to make a withdrawal");
+      setError("You must be logged in to make a withdrawal");
       return;
     }
 
     try {
+      setIsSubmitting(true);
+      setError(null);
       await submitWithdrawalRequest(token, amount);
       Alert.alert("Success", "Withdrawal request submitted successfully");
       setShowWithdrawalForm(false);
       fetchData(); // Refresh data after successful request
     } catch (error) {
       console.error("Error submitting withdrawal request:", error);
-      Alert.alert("Error", "Failed to submit withdrawal request");
+      setError("Failed to submit withdrawal request. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ThemedText>Loading...</ThemedText>
+        <ActivityIndicator size="large" color={useThemeColor({}, "text")} />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
-      <ScrollView 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor }]}
+      edges={["top"]}
+    >
+      <ScrollView
         style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -83,11 +106,9 @@ export default function PointsPaymentScreen() {
         <ThemedView style={styles.content}>
           <ThemedText type="title">Points & Payments</ThemedText>
 
-          <ThemedView style={styles.pointsContainer}>
-            <ThemedText type="subtitle">Your Points</ThemedText>
-            <ThemedText style={styles.pointsValue}>{pointsData?.balance ?? 0}</ThemedText>
-            <ThemedText>Equivalent to: ₵{((pointsData?.balance ?? 0) / 50).toFixed(2)}</ThemedText>
-          </ThemedView>
+          {error && <ThemedText style={styles.errorText}>{error}</ThemedText>}
+
+          {pointsData && <PointsBalance balance={pointsData.balance} />}
 
           {!showWithdrawalForm && (
             <Button
@@ -102,19 +123,13 @@ export default function PointsPaymentScreen() {
               onSubmit={handleWithdrawalRequest}
               onCancel={() => setShowWithdrawalForm(false)}
               maxAmount={(pointsData?.balance ?? 0) / 50}
+              isSubmitting={isSubmitting}
             />
           )}
 
-          <ThemedView style={styles.historyContainer}>
-            <ThemedText type="subtitle">Withdrawal History</ThemedText>
-            {pointsData?.withdrawalHistory.map((withdrawal) => (
-              <ThemedView key={withdrawal.id} style={styles.historyItem}>
-                <ThemedText>Amount: ₵{withdrawal.amount.toFixed(2)}</ThemedText>
-                <ThemedText>Status: {withdrawal.status}</ThemedText>
-                <ThemedText>Date: {new Date(withdrawal.created_at).toLocaleDateString()}</ThemedText>
-              </ThemedView>
-            ))}
-          </ThemedView>
+          {pointsData && (
+            <WithdrawalHistory withdrawals={pointsData.withdrawalHistory} />
+          )}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
@@ -131,25 +146,11 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  pointsContainer: {
-    marginVertical: 16,
-    alignItems: "center",
-  },
-  pointsValue: {
-    fontSize: 48,
-    fontWeight: "bold",
-    marginVertical: 8,
-  },
   withdrawButton: {
     marginBottom: 16,
   },
-  historyContainer: {
-    marginTop: 24,
-  },
-  historyItem: {
+  errorText: {
+    color: "red",
     marginBottom: 16,
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#f0f0f0",
   },
 });
