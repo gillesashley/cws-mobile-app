@@ -113,24 +113,24 @@ export const fetchPointsData = async (token: string): Promise<PointsData> => {
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching points data:", error);
-    throw error;
-  }
-};
-
-export const submitWithdrawalRequest = async (
-  token: string,
-  amount: number
-): Promise<void> => {
-  try {
-    await axios.post(
-      `${API_BASE_URL}/reward-withdrawals`,
-      { amount },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-  } catch (error) {
-    console.error("Error submitting withdrawal request:", error);
-    throw error;
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        console.error(
+          "Points endpoint not found. The API might not be implemented yet."
+        );
+        throw new Error(
+          "Points feature is not available at the moment. Please try again later."
+        );
+      } else {
+        console.error("Error fetching points data:", error.message);
+        throw new Error(`Failed to fetch points data: ${error.message}`);
+      }
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error(
+        "An unexpected error occurred while fetching points data"
+      );
+    }
   }
 };
 
@@ -163,5 +163,28 @@ export const updateWithdrawalStatus = async (
   } catch (error) {
     console.error("Error updating withdrawal status:", error);
     throw error;
+  }
+};
+
+export const submitWithdrawalRequest = async (
+  token: string,
+  amount: number
+): Promise<void> => {
+  try {
+    await axios.post(
+      `${API_BASE_URL}/reward-withdrawals`,
+      { amount },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("Error submitting withdrawal request:", error.message);
+      throw new Error(`Failed to submit withdrawal request: ${error.message}`);
+    } else {
+      console.error("Unexpected error:", error);
+      throw new Error(
+        "An unexpected error occurred while submitting the withdrawal request"
+      );
+    }
   }
 };
