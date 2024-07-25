@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 interface StatisticCardProps {
   title: string;
@@ -15,16 +16,18 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({
   const isPositive = change >= 0;
   const changeColor = isPositive ? "#4CAF50" : "#F44336";
   const changeIcon = isPositive ? "▲" : "▼";
+  const backgroundColor = useThemeColor({}, "background");
+  const textColor = useThemeColor({}, "text");
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.value}>{value.toLocaleString()}</Text>
+    <View style={[styles.container, { backgroundColor }]}>
+      <Text style={[styles.title, { color: textColor }]}>{title}</Text>
+      <Text style={[styles.value, { color: textColor }]}>{value.toLocaleString()}</Text>
       <View style={styles.changeContainer}>
         <Text style={[styles.changeText, { color: changeColor }]}>
           {changeIcon} {Math.abs(change).toFixed(2)}%
         </Text>
-        <Text style={styles.periodText}>than last week</Text>
+        <Text style={[styles.periodText, { color: textColor }]}>than last week</Text>
       </View>
     </View>
   );
@@ -32,20 +35,23 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFF",
-    borderRadius: 8,
+    borderRadius: 16,
     padding: 16,
-    marginBottom: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   title: {
     fontSize: 14,
-    color: "#666",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   value: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 4,
+    marginBottom: 8,
   },
   changeContainer: {
     flexDirection: "row",
@@ -58,6 +64,5 @@ const styles = StyleSheet.create({
   },
   periodText: {
     fontSize: 12,
-    color: "#666",
   },
 });

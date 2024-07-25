@@ -10,7 +10,13 @@ import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { AnalyticsData, fetchAnalyticsData } from "@/services/analytics";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 function isValidAnalyticsData(data: any): data is AnalyticsData {
@@ -127,26 +133,36 @@ function AnalyticsScreen() {
       <ScrollView>
         <AnalyticsHeader onInfoPress={handleInfoPress} />
         <ThemedView style={styles.content}>
-          <StatisticCard
-            title="Posts Shared"
-            value={analyticsData.postsShared}
-            change={analyticsData.postsSharedChange}
-          />
-          <StatisticCard
-            title="Post Likes"
-            value={analyticsData.postLikes}
-            change={analyticsData.postLikesChange}
-          />
-          <StatisticCard
-            title="Posts Read"
-            value={analyticsData.postsRead}
-            change={analyticsData.postsReadChange}
-          />
-          <StatisticCard
-            title="Total Points"
-            value={Number(analyticsData.totalPoints)}
-            change={analyticsData.totalPointsChange}
-          />
+          <View style={styles.gridContainer}>
+            <View style={styles.gridItem}>
+              <StatisticCard
+                title="Total Followers"
+                value={analyticsData.postsShared}
+                change={analyticsData.postsSharedChange}
+              />
+            </View>
+            <View style={styles.gridItem}>
+              <StatisticCard
+                title="Total Likes"
+                value={analyticsData.postLikes}
+                change={analyticsData.postLikesChange}
+              />
+            </View>
+            <View style={styles.gridItem}>
+              <StatisticCard
+                title="Total Saved"
+                value={analyticsData.postsRead}
+                change={analyticsData.postsReadChange}
+              />
+            </View>
+            <View style={styles.gridItem}>
+              <StatisticCard
+                title="Total Comment"
+                value={Number(analyticsData.totalPoints)}
+                change={analyticsData.totalPointsChange}
+              />
+            </View>
+          </View>
           <UserActivityBreakdown
             postsShared={analyticsData.postsShared}
             postLikes={analyticsData.postLikes}
@@ -183,6 +199,16 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  gridItem: {
+    width: "48%",
+    marginBottom: 16,
   },
 });
 
