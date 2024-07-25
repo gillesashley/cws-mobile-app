@@ -1,46 +1,119 @@
-import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import React, { useState, useEffect, useCallback } from "react";
+import { ScrollView, StyleSheet, View, Alert, RefreshControl } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Button } from "@/components/ui/Button";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuthContext } from "@/components/AuthProvider";
+import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
+import { fetchPointsData, submitWithdrawalRequest, PointsData } from "@/services/services";
 
 export default function PointsPaymentScreen() {
+  const [pointsData, setPointsData] = useState<PointsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
+
+  const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
+
+  const fetchData = useCallback(async () => {
+    if (!token) {
+      Alert.alert("Error", "You must be logged in to view this page");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const data = await fetchPointsData(token);
+      setPointsData(data);
+    } catch (error) {
+      console.error("Error fetching points data:", error);
+      Alert.alert("Error", "Failed to load points data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  }, [fetchData]);
+
+  const handleWithdrawalRequest = async (amount: number) => {
+    if (!token) {
+      Alert.alert("Error", "You must be logged in to make a withdrawal");
+      return;
+    }
+
+    try {
+      await submitWithdrawalRequest(token, amount);
+      Alert.alert("Success", "Withdrawal request submitted successfully");
+      setShowWithdrawalForm(false);
+      fetchData(); // Refresh data after successful request
+    } catch (error) {
+      console.error("Error submitting withdrawal request:", error);
+      Alert.alert("Error", "Failed to submit withdrawal request");
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor }]}>
+        <ThemedText>Loading...</ThemedText>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView
-      style={[styles.container, { backgroundColor }]}
-      edges={["top"]}
-    >
-      <ScrollView style={styles.scrollView}>
-        <ThemedView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <ThemedView style={styles.content}>
           <ThemedText type="title">Points & Payments</ThemedText>
 
           <ThemedView style={styles.pointsContainer}>
             <ThemedText type="subtitle">Your Points</ThemedText>
-            <ThemedText>500 Points</ThemedText>
-            <ThemedText style={styles.pointsValue}>1,250</ThemedText>
-            <ThemedText>Equivalent to: ₵25.00</ThemedText>
+            <ThemedText style={styles.pointsValue}>{pointsData?.balance ?? 0}</ThemedText>
+            <ThemedText>Equivalent to: ₵{((pointsData?.balance ?? 0) / 50).toFixed(2)}</ThemedText>
           </ThemedView>
 
-          <ThemedView style={styles.activityContainer}>
-            <ThemedText type="subtitle">Recent Activity</ThemedText>
-            <ThemedText>+10 points - Shared campaign message</ThemedText>
-            <ThemedText>+5 points - Liked a post</ThemedText>
-            <ThemedText>+2 points - Read campaign update</ThemedText>
-          </ThemedView>
-
-          <ThemedView style={styles.withdrawContainer}>
-            <ThemedText type="subtitle">Withdraw Funds</ThemedText>
+          {!showWithdrawalForm && (
             <Button
               title="Request Withdrawal"
-              onPress={() => console.log("Withdraw pressed")}
+              onPress={() => setShowWithdrawalForm(true)}
+              style={styles.withdrawButton}
             />
-            <ThemedText style={styles.withdrawalNote}>
-              Minimum withdrawal: ₵10.00 (500 points)
-            </ThemedText>
+          )}
+
+          {showWithdrawalForm && (
+            <WithdrawalForm
+              onSubmit={handleWithdrawalRequest}
+              onCancel={() => setShowWithdrawalForm(false)}
+              maxAmount={(pointsData?.balance ?? 0) / 50}
+            />
+          )}
+
+          <ThemedView style={styles.historyContainer}>
+            <ThemedText type="subtitle">Withdrawal History</ThemedText>
+            {pointsData?.withdrawalHistory.map((withdrawal) => (
+              <ThemedView key={withdrawal.id} style={styles.historyItem}>
+                <ThemedText>Amount: ₵{withdrawal.amount.toFixed(2)}</ThemedText>
+                <ThemedText>Status: {withdrawal.status}</ThemedText>
+                <ThemedText>Date: {new Date(withdrawal.created_at).toLocaleDateString()}</ThemedText>
+              </ThemedView>
+            ))}
           </ThemedView>
         </ThemedView>
       </ScrollView>
@@ -49,11 +122,13 @@ export default function PointsPaymentScreen() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scrollView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
+  content: {
     padding: 16,
   },
   pointsContainer: {
@@ -65,15 +140,16 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginVertical: 8,
   },
-  activityContainer: {
-    marginVertical: 16,
+  withdrawButton: {
+    marginBottom: 16,
   },
-  withdrawContainer: {
-    marginVertical: 16,
-    alignItems: "center",
+  historyContainer: {
+    marginTop: 24,
   },
-  withdrawalNote: {
-    marginTop: 8,
-    fontStyle: "italic",
+  historyItem: {
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: "#f0f0f0",
   },
 });

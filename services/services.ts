@@ -38,6 +38,20 @@ export interface CampaignMessage {
   shareable_url: string;
 }
 
+export interface PointsData {
+  balance: number;
+  withdrawalHistory: Array<{
+    id: number;
+    amount: number;
+    status: string;
+    created_at: string;
+  }>;
+}
+
+export interface WithdrawalRequest {
+  amount: number;
+}
+
 export const fetchRegions = async (): Promise<Region[]> => {
   try {
     const response = await axios.get(`${API_BASE_URL}/regions`);
@@ -88,6 +102,66 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
       console.error("Error request:", error.request);
       console.error("Error config:", error.config);
     }
+    throw error;
+  }
+};
+
+export const fetchPointsData = async (token: string): Promise<PointsData> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/points`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching points data:", error);
+    throw error;
+  }
+};
+
+export const submitWithdrawalRequest = async (
+  token: string,
+  amount: number
+): Promise<void> => {
+  try {
+    await axios.post(
+      `${API_BASE_URL}/reward-withdrawals`,
+      { amount },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (error) {
+    console.error("Error submitting withdrawal request:", error);
+    throw error;
+  }
+};
+
+export const fetchWithdrawalRequests = async (
+  token: string
+): Promise<WithdrawalRequest[]> => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/reward-withdrawals`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching withdrawal requests:", error);
+    throw error;
+  }
+};
+
+export const updateWithdrawalStatus = async (
+  token: string,
+  withdrawalId: number,
+  status: "approved" | "rejected",
+  rejectionReason?: string
+): Promise<void> => {
+  try {
+    await axios.put(
+      `${API_BASE_URL}/reward-withdrawals/${withdrawalId}`,
+      { status, rejection_reason: rejectionReason },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  } catch (error) {
+    console.error("Error updating withdrawal status:", error);
     throw error;
   }
 };
