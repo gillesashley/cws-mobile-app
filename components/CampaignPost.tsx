@@ -90,6 +90,7 @@ export function CampaignPost({
   const handleShare = async (platform: string) => {
     try {
       console.log("Token when sharing:", token);
+      console.log("Shareable URL:", shareableUrl);
 
       let url = "";
       let message = `Check out this campaign: ${shareableUrl}`;
@@ -132,10 +133,7 @@ export function CampaignPost({
       );
       setShares(shares + 1);
       setIsShareModalVisible(false);
-      Alert.alert(
-        "Success",
-        `You earned ${response.data.points_awarded} points for sharing this post!`
-      );
+      handleShareSuccess(response.data.points_awarded);
     } catch (error) {
       console.error("Error sharing post:", error);
       if (axios.isAxiosError(error) && error.response) {
