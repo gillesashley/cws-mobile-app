@@ -21,7 +21,7 @@ export default function LikeButton({
 }: LikeButtonProps) {
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
-  const { user, token } = useAuthContext();
+  const { token } = useAuthContext();
 
   const iconColor = useThemeColor(
     { light: "#757575", dark: "#A0A0A0" },
@@ -48,12 +48,10 @@ export default function LikeButton({
 
   const handleLike = useCallback(
     debounce(async () => {
-      const previousLikes = likes;
-      const previousIsLiked = isLiked;
-
-      // Optimistic update
-      setLikes(isLiked ? likes - 1 : likes + 1);
-      setIsLiked(!isLiked);
+      if (isLiked) {
+        // If already liked, don't do anything
+        return;
+      }
 
       try {
         const response = await axios.post(
@@ -61,12 +59,15 @@ export default function LikeButton({
           {},
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        onLikeSuccess(response.data.points_awarded);
-      } catch (error) {
-        // Revert optimistic update on error
-        setLikes(previousLikes);
-        setIsLiked(previousIsLiked);
 
+        if (response.status === 201) {
+          setIsLiked(true);
+          setLikes((prevLikes) => prevLikes + 1);
+          onLikeSuccess(response.data.points_awarded);
+        } else {
+          throw new Error("Unexpected response status");
+        }
+      } catch (error) {
         console.error("Error liking post:", error);
         if (axios.isAxiosError(error)) {
           if (error.response?.status === 401) {
@@ -74,6 +75,9 @@ export default function LikeButton({
               "Authentication Error",
               "Please log in again to like this post."
             );
+          } else if (error.response?.status === 400) {
+            // Already liked
+            setIsLiked(true);
           } else if (error.response?.data?.message) {
             Alert.alert("Error", error.response.data.message);
           } else {
@@ -87,7 +91,7 @@ export default function LikeButton({
         }
       }
     }, 300),
-    [postId, likes, isLiked, token]
+    [postId, isLiked, token]
   );
 
   return (
