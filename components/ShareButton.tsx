@@ -44,7 +44,7 @@ export default function ShareButton({
       });
 
       if (result.action === Share.sharedAction) {
-        let platform = "unknown";
+        let platform = "other"; // Default to 'other'
 
         if (Platform.OS === "ios") {
           // iOS
@@ -57,30 +57,26 @@ export default function ShareButton({
           }
         } else {
           // Android
-          // On Android, we can't determine the exact platform, so we'll use a generic "shared" platform
-          platform = "shared";
+          platform = "shared"; // Use 'shared' for Android as we can't determine the exact platform
         }
 
         console.log("Sharing platform:", platform);
 
-        // Only proceed if the share was completed
-        if (platform !== "unknown") {
-          try {
-            const response = await axios.post(
-              `${API_BASE_URL}/campaign-messages/${postId}/share`,
-              { platform },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+        try {
+          const response = await axios.post(
+            `${API_BASE_URL}/campaign-messages/${postId}/share`,
+            { platform },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
 
-            setShareCount((prevCount) => prevCount + 1);
-            onShareSuccess(response.data.points_awarded);
-          } catch (error) {
-            console.error("Error recording share:", error);
-            Alert.alert(
-              "Error",
-              "Failed to record the share. Please try again."
-            );
+          setShareCount((prevCount) => prevCount + 1);
+          onShareSuccess(response.data.points_awarded);
+        } catch (error) {
+          console.error("Error recording share:", error);
+          if (axios.isAxiosError(error) && error.response) {
+            console.error("Server response:", error.response.data);
           }
+          Alert.alert("Error", "Failed to record the share. Please try again.");
         }
       }
     } catch (error) {
