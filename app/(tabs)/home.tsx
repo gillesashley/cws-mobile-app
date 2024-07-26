@@ -1,6 +1,7 @@
 // app/(tabs)/home.tsx
-import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -34,11 +35,14 @@ type RootStackParamList = {
 
 export default function HomeScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-  const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>([]);
+  const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userBalance, setUserBalance] = useState<number | null>(null);
   const [showAllCampaigns, setShowAllCampaigns] = useState(false);
+  const router = useRouter();
 
   const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
@@ -49,7 +53,6 @@ export default function HomeScreen() {
       setIsLoading(false);
       return;
     }
-
     try {
       setIsLoading(true);
       const [messages, balance] = await Promise.all([
@@ -90,7 +93,7 @@ export default function HomeScreen() {
     >
       <Header
         balance={userBalance}
-        onBalancePress={() => navigation.navigate("PointsPayment")}
+        onBalancePress={() => router.push("/points-payment")}
       />
       <ThemedView style={styles.content}>
         <View style={styles.sectionHeader}>

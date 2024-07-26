@@ -47,10 +47,6 @@ export default function RootLayout() {
               <Stack.Screen name="register" options={{ title: "Register" }} />
               <Stack.Screen name="full-post" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
-              {/* <Stack.Screen
-                name="points-payment"
-                options={{ title: "Points Payment" }}
-              /> */}
             </Stack>
           </ThemeProvider>
         </SafeAreaProvider>

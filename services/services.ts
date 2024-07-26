@@ -217,12 +217,22 @@ export const submitWithdrawalRequest = async (
 
 export const fetchUserBalance = async (token: string): Promise<number> => {
   try {
+    console.log("Fetching user balance with token:", token);
     const response = await axios.get(`${API_BASE_URL}/user-balance`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    console.log("User balance response:", response.data);
     return response.data.balance;
   } catch (error) {
-    console.error("Error fetching user balance:", error);
+    if (axios.isAxiosError(error)) {
+      console.error(
+        "Error fetching user balance:",
+        error.response?.status,
+        error.response?.data
+      );
+    } else {
+      console.error("Unexpected error:", error);
+    }
     throw error;
   }
 };

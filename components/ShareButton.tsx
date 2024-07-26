@@ -36,12 +36,23 @@ export default function ShareButton({
       });
 
       if (result.action === Share.sharedAction) {
+        // Determine the platform
+        let platform = "facebook"; // default to facebook
+        if (result.activityType) {
+          // iOS
+          if (result.activityType.includes("facebook")) platform = "facebook";
+          else if (result.activityType.includes("twitter"))
+            platform = "twitter";
+          else if (result.activityType.includes("whatsapp"))
+            platform = "whatsapp";
+        }
+
         // Optimistic update
         setShareCount(shareCount + 1);
 
         const response = await axios.post(
           `${API_BASE_URL}/campaign-messages/${postId}/share`,
-          { platform: "other" },
+          { platform },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -49,6 +60,10 @@ export default function ShareButton({
       }
     } catch (error) {
       console.error("Error sharing post:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        console.error("Error response data:", error.response.data);
+        console.error("Error response status:", error.response.status);
+      }
       // Revert optimistic update on error
       setShareCount(shares);
       Alert.alert("Error", "Failed to share the post. Please try again.");
