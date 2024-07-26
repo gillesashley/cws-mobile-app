@@ -1,6 +1,5 @@
-import LikeButton from "@/components/LikeButton";
-import ShareButton from "@/components/ShareButton";
-import { ThemedText } from "@/components/ThemedText";
+// full-post.tsx
+
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -13,23 +12,22 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ThemedText } from "@/components/ThemedText";
+import { CampaignPostActions } from "@/components/campaign/CampaignPostActions";
 
 export default function FullPostScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { id, title, description, imageUrl, likes, shares, shareableUrl } =
-    params;
+  const { id, title, content, imageUrl, likes_count, shares_count, shareable_url } = params;
 
   const backgroundColor = useThemeColor({}, "background");
   const textColor = useThemeColor({}, "text");
 
   const handleLikeSuccess = (pointsAwarded: number) => {
-    // Handle like success
     console.log(`Liked! Earned ${pointsAwarded} points.`);
   };
 
   const handleShareSuccess = (pointsAwarded: number) => {
-    // Handle share success
     console.log(`Shared! Earned ${pointsAwarded} points.`);
   };
 
@@ -39,24 +37,19 @@ export default function FullPostScreen() {
         <Ionicons name="arrow-back" size={24} color={textColor} />
       </TouchableOpacity>
       <ScrollView>
-        <Image source={{ uri: imageUrl as string }} style={styles.image} />
+        {imageUrl && <Image source={{ uri: imageUrl as string }} style={styles.image} />}
         <View style={styles.content}>
-          <ThemedText style={styles.title}>{title}</ThemedText>
-          <ThemedText style={styles.description}>{description}</ThemedText>
-          <View style={styles.statsContainer}>
-            <LikeButton
-              postId={id as string}
-              initialLikes={Number(likes)}
-              onLikeSuccess={handleLikeSuccess}
-            />
-            <ShareButton
-              postId={id as string}
-              shares={Number(shares)}
-              shareableUrl={shareableUrl as string}
-              title={title as string}
-              onShareSuccess={handleShareSuccess}
-            />
-          </View>
+          <ThemedText style={styles.title}>{title as string}</ThemedText>
+          <ThemedText style={styles.description}>{content as string}</ThemedText>
+          <CampaignPostActions
+            id={id as string}
+            likes_count={Number(likes_count)}
+            shares_count={Number(shares_count)}
+            shareable_url={shareable_url as string}
+            title={title as string}
+            onLikeSuccess={handleLikeSuccess}
+            onShareSuccess={handleShareSuccess}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -86,9 +79,5 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     marginBottom: 16,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
   },
 });

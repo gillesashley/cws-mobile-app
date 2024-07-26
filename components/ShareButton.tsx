@@ -61,6 +61,8 @@ export default function ShareButton({
           platform = "shared";
         }
 
+        console.log("Sharing platform:", platform);
+
         // Only proceed if the share was completed
         if (platform !== "unknown") {
           try {
