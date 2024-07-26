@@ -1,4 +1,4 @@
-// app/(tabs)/home.tsx
+import { useUserData } from "@/components/UserDataContext";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useRouter } from "expo-router";
@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   FlatList,
   Modal,
+  RefreshControl,
+  ScrollView,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -27,14 +29,13 @@ import {
   fetchUserBalance,
 } from "@/services/services";
 
-// Define the RootStackParamList if not already defined
 type RootStackParamList = {
   PointsPayment: undefined;
-  // Add other routes if needed
 };
 
 export default function HomeScreen() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const { balance, updateBalance } = useUserData();
   const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>(
     []
   );
@@ -42,36 +43,47 @@ export default function HomeScreen() {
   const [error, setError] = useState<string | null>(null);
   const [userBalance, setUserBalance] = useState<number | null>(null);
   const [showAllCampaigns, setShowAllCampaigns] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
   const { token } = useAuthContext();
   const backgroundColor = useThemeColor({}, "background");
 
-  const loadData = useCallback(async () => {
-    if (!token) {
-      setError("You must be logged in to view this content.");
-      setIsLoading(false);
-      return;
-    }
-    try {
-      setIsLoading(true);
-      const [messages, balance] = await Promise.all([
-        fetchCampaignMessages(token),
-        fetchUserBalance(token),
-      ]);
-      setCampaignMessages(messages);
-      setUserBalance(balance);
-      setError(null);
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setError("Failed to load data. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [token]);
+  const loadData = useCallback(
+    async (isRefreshing = false) => {
+      if (!token) {
+        setError("You must be logged in to view this content.");
+        setIsLoading(false);
+        setRefreshing(false);
+        return;
+      }
+      try {
+        const [messages, balance] = await Promise.all([
+          fetchCampaignMessages(token),
+          fetchUserBalance(token),
+        ]);
+        setCampaignMessages(messages);
+        setUserBalance(balance);
+        updateBalance(balance);
+        setError(null);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load data. Please try again.");
+      } finally {
+        setIsLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [token, updateBalance]
+  );
 
   useEffect(() => {
     loadData();
+  }, [loadData]);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    loadData(true);
   }, [loadData]);
 
   if (isLoading) {
@@ -83,7 +95,7 @@ export default function HomeScreen() {
   }
 
   if (error) {
-    return <ErrorView error={error} onRetry={loadData} />;
+    return <ErrorView error={error} onRetry={() => loadData()} />;
   }
 
   return (
@@ -95,24 +107,34 @@ export default function HomeScreen() {
         balance={userBalance}
         onBalancePress={() => router.push("/points-payment")}
       />
-      <ThemedView style={styles.content}>
-        <View style={styles.sectionHeader}>
-          <ThemedText type="subtitle" style={styles.sectionTitle}>
-            Latest Campaigns
-          </ThemedText>
-          <TouchableOpacity onPress={() => setShowAllCampaigns(true)}>
-            <ThemedText type="link">See All</ThemedText>
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={campaignMessages.slice(0, 5)}
-          renderItem={({ item }) => <CampaignPost {...item} />}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.campaignPostsContainer}
-        />
-      </ThemedView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#9Bd35A", "#689F38"]}
+          />
+        }
+      >
+        <ThemedView style={styles.content}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="subtitle" style={styles.sectionTitle}>
+              Latest Campaigns
+            </ThemedText>
+            <TouchableOpacity onPress={() => setShowAllCampaigns(true)}>
+              <ThemedText type="link">See All</ThemedText>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={campaignMessages.slice(0, 5)}
+            renderItem={({ item }) => <CampaignPost {...item} />}
+            keyExtractor={(item) => item.id}
+            contentContainerStyle={styles.campaignPostsContainer}
+          />
+        </ThemedView>
+      </ScrollView>
       <Modal
         visible={showAllCampaigns}
         animationType="slide"

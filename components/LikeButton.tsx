@@ -5,6 +5,7 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import debounce from "lodash/debounce";
+import { useUserData } from '@/components/UserDataContext';
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 
@@ -19,6 +20,7 @@ export default function LikeButton({
   initialLikes,
   onLikeSuccess,
 }: LikeButtonProps) {
+  const { updateBalance } = useUserData();
   const [isLiked, setIsLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const { token } = useAuthContext();
@@ -69,6 +71,7 @@ export default function LikeButton({
         if (response.status === 201) {
           setIsLiked(true);
           setLikes((prevLikes) => prevLikes + 1);
+          updateBalance(response.data.new_total_points);
           onLikeSuccess(response.data.points_awarded);
         } else {
           throw new Error("Unexpected response status");
@@ -98,7 +101,7 @@ export default function LikeButton({
         }
       }
     }, 300),
-    [postId, isLiked, token, onLikeSuccess]
+    [postId, isLiked, token, onLikeSuccess, updateBalance]
   );
 
   return (

@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { ThemedText } from './ThemedText';
-import { useThemeColor } from '@/hooks/useThemeColor';
+import { useThemeColor } from "@/hooks/useThemeColor";
+import React from "react";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { ThemedText } from "./ThemedText";
 
 interface HeaderProps {
   balance: number | null;
@@ -13,14 +13,14 @@ export const Header: React.FC<HeaderProps> = ({ balance, onBalancePress }) => {
 
   return (
     <View style={styles.header}>
-      <Image
-        source={require("@/assets/images/logo.png")}
-        style={styles.logo}
-      />
+      <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
       <ThemedText style={styles.headerTitle}>CWS</ThemedText>
-      <TouchableOpacity style={[styles.balanceContainer, { backgroundColor }]} onPress={onBalancePress}>
+      <TouchableOpacity
+        style={[styles.balanceContainer, { backgroundColor }]}
+        onPress={onBalancePress}
+      >
         <ThemedText style={styles.balanceText}>
-          ₵ {balance !== null ? balance.toFixed(4) : '---'}
+          Pts: {balance !== null ? balance.toFixed(2) : "---"}
         </ThemedText>
       </TouchableOpacity>
     </View>
