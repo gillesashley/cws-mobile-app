@@ -1,12 +1,14 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { CampaignPostImage } from './campaign/CampaignPostImage';
-import { CampaignPostContent } from './campaign/CampaignPostContent'; 
-import { CampaignPostActions } from './campaign/CampaignPostActions'; 
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { Alert, Dimensions, StyleSheet, View } from "react-native";
+import { CampaignPostActions } from "./campaign/CampaignPostActions";
+import { CampaignPostContent } from "./campaign/CampaignPostContent";
+import { CampaignPostImage } from "./campaign/CampaignPostImage";
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = width * 0.7;
+const { width, height } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.9;
+const CARD_HEIGHT = height * 0.6;
 
 export interface CampaignPostProps {
   id: string;
@@ -23,13 +25,43 @@ export interface CampaignPostProps {
 }
 
 export function CampaignPost(props: CampaignPostProps) {
-  const backgroundColor = useThemeColor({ light: '#FFFFFF', dark: '#2C2C2C' }, 'background');
+  const backgroundColor = useThemeColor(
+    { light: "#FFFFFF", dark: "#2C2C2C" },
+    "background"
+  );
+  const accentColor = useThemeColor({}, "accent");
+  const textColor = useThemeColor({}, "text");
+
+  const handleLikeSuccess = (pointsAwarded: number) => {
+    Alert.alert(
+      "Success",
+      `You have been awarded ${pointsAwarded} points for liking the post!`
+    );
+  };
+
+  const handleShareSuccess = (pointsAwarded: number) => {
+    Alert.alert(
+      "Success",
+      `You have been awarded ${pointsAwarded} points for sharing the post!`
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor }]}>
-      <CampaignPostImage imageUrl={props.image_url} />
-      <CampaignPostContent {...props} />
-      <CampaignPostActions {...props} />
+      <CampaignPostImage imageUrl={props.image_url} style={styles.image} />
+      <LinearGradient
+        colors={["transparent", "rgba(0,0,0,0.8)"]}
+        style={styles.gradient}
+      >
+        <View style={styles.contentWrapper}>
+          <CampaignPostContent {...props} textColor={textColor} />
+          <CampaignPostActions
+            {...props}
+            onLikeSuccess={handleLikeSuccess}
+            onShareSuccess={handleShareSuccess}
+          />
+        </View>
+      </LinearGradient>
     </View>
   );
 }
@@ -37,13 +69,31 @@ export function CampaignPost(props: CampaignPostProps) {
 const styles = StyleSheet.create({
   container: {
     width: CARD_WIDTH,
-    borderRadius: 16,
+    height: CARD_HEIGHT,
+    borderRadius: 20,
     marginRight: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    overflow: 'hidden',
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+    overflow: "hidden",
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  gradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: "60%",
+    justifyContent: "flex-end",
+  },
+  contentWrapper: {
+    padding: 16,
   },
 });

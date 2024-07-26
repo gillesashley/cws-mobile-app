@@ -1,12 +1,13 @@
 import React from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, ImageStyle } from 'react-native';
 
 interface CampaignPostImageProps {
   imageUrl: string;
+  style?: ImageStyle;
 }
 
-export function CampaignPostImage({ imageUrl }: CampaignPostImageProps) {
-  return <Image source={{ uri: imageUrl }} style={styles.image} />;
+export function CampaignPostImage({ imageUrl, style }: CampaignPostImageProps) {
+  return <Image source={{ uri: imageUrl }} style={[styles.image, style]} />;
 }
 
 const styles = StyleSheet.create({

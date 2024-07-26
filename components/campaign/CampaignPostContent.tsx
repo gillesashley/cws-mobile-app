@@ -6,7 +6,9 @@ import { CampaignPostProps } from "../CampaignPost";
 type CampaignPostContentProps = Pick<
   CampaignPostProps,
   "id" | "title" | "content" | "likes_count" | "shares_count" | "shareable_url"
->;
+> & {
+  textColor: string;
+};
 
 export function CampaignPostContent({
   id,

@@ -109,7 +109,10 @@ export default function PointsPaymentScreen() {
 
   const ListHeader = () => (
     <View>
-      <ThemedText type="title">Points & Payments</ThemedText>
+      <ThemedView style={styles.titleContainer}>
+        <ThemedText style={styles.title}>Points & Payments</ThemedText>
+        <ThemedView style={styles.titleUnderline} />
+      </ThemedView>
       {error && <ThemedText style={styles.errorText}>{error}</ThemedText>}
       {pointsData && <PointsBalance balance={pointsData.balance} />}
       {!showWithdrawalForm && (
@@ -205,5 +208,19 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: "center",
     marginTop: 16,
+  },
+  titleContainer: {
+    marginBottom: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  titleUnderline: {
+    height: 3,
+    width: 60,
+    backgroundColor: useThemeColor({}, "accent"),
+    borderRadius: 2,
   },
 });

@@ -57,7 +57,6 @@ const PointsBalance: React.FC<PointsBalanceProps> = ({ balance }) => {
           </ThemedText>
           <ThemedText
             type="default"
-            fontStyle="italic"
             style={[styles.equivalentText, { color: textColor }]}
           >
             Equivalent to: ₵{(balance / 50).toFixed(2)}
@@ -100,7 +99,9 @@ const styles = StyleSheet.create({
   },
   equivalentText: {
     fontSize: 14,
-    opacity: 0.8,
+    fontWeight: "bold",
+    fontStyle: "italic",
+    marginTop: 4,
   },
 });
 
