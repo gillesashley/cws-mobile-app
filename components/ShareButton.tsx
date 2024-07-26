@@ -38,7 +38,7 @@ export default function ShareButton({
   const handleShare = async () => {
     try {
       const result = await Share.share({
-        message: `Check out this campaign: ${title}`,
+        message: `Check out this campaign: ${shareableUrl}`,
         url: shareableUrl, // iOS only
         title: title, // Android only
       });
