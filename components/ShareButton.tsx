@@ -5,7 +5,13 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useState } from "react";
-import { Alert, Share, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Alert,
+  Platform,
+  Share,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 
 interface ShareButtonProps {
   postId: string;
@@ -32,40 +38,51 @@ export default function ShareButton({
   const handleShare = async () => {
     try {
       const result = await Share.share({
-        message: `Check out this campaign: ${shareableUrl}`,
+        message: `Check out this campaign: ${title}`,
+        url: shareableUrl, // iOS only
+        title: title, // Android only
       });
 
       if (result.action === Share.sharedAction) {
-        // Determine the platform
-        let platform = "facebook"; // default to facebook
-        if (result.activityType) {
+        let platform = "unknown";
+
+        if (Platform.OS === "ios") {
           // iOS
-          if (result.activityType.includes("facebook")) platform = "facebook";
-          else if (result.activityType.includes("twitter"))
-            platform = "twitter";
-          else if (result.activityType.includes("whatsapp"))
-            platform = "whatsapp";
+          if (result.activityType) {
+            if (result.activityType.includes("facebook")) platform = "facebook";
+            else if (result.activityType.includes("twitter"))
+              platform = "twitter";
+            else if (result.activityType.includes("whatsapp"))
+              platform = "whatsapp";
+          }
+        } else {
+          // Android
+          // On Android, we can't determine the exact platform, so we'll use a generic "shared" platform
+          platform = "shared";
         }
 
-        // Optimistic update
-        setShareCount(shareCount + 1);
+        // Only proceed if the share was completed
+        if (platform !== "unknown") {
+          try {
+            const response = await axios.post(
+              `${API_BASE_URL}/campaign-messages/${postId}/share`,
+              { platform },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
 
-        const response = await axios.post(
-          `${API_BASE_URL}/campaign-messages/${postId}/share`,
-          { platform },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        onShareSuccess(response.data.points_awarded);
+            setShareCount((prevCount) => prevCount + 1);
+            onShareSuccess(response.data.points_awarded);
+          } catch (error) {
+            console.error("Error recording share:", error);
+            Alert.alert(
+              "Error",
+              "Failed to record the share. Please try again."
+            );
+          }
+        }
       }
     } catch (error) {
       console.error("Error sharing post:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        console.error("Error response data:", error.response.data);
-        console.error("Error response status:", error.response.status);
-      }
-      // Revert optimistic update on error
-      setShareCount(shares);
       Alert.alert("Error", "Failed to share the post. Please try again.");
     }
   };
