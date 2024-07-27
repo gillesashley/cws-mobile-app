@@ -31,7 +31,7 @@ export default function ShareButton({
   const [shareCount, setShareCount] = useState(shares);
   const { token } = useAuthContext();
   const iconColor = useThemeColor(
-    { light: "#757575", dark: "#A0A0A0" },
+    { light: "#FFFFFF", dark: "#A0A0A0" },
     "text"
   );
 
@@ -102,5 +102,6 @@ const styles = StyleSheet.create({
   statText: {
     marginLeft: 4,
     fontSize: 14,
+    color: "#FFFFFF",
   },
 });

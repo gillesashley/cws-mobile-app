@@ -1,25 +1,19 @@
-import { fetchUserProfile, UserProfile } from "@/services/services";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  TextStyle,
-  ViewStyle,
-} from "react-native";
+import { Alert, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
+import { LoadingState } from "@/components/profile-page/LoadingState";
+import { LocationCard } from "@/components/profile-page/LocationCard";
+import { PersonalInfoCard } from "@/components/profile-page/PersonalInfoCard";
+import { ProfileHeader } from "@/components/profile-page/ProfileHeader";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
 import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { fetchUserProfile, UserProfile } from "@/services/services";
+import axios from "axios";
 
 type ColorScheme = "light" | "dark";
 
@@ -27,10 +21,11 @@ export default function ProfileScreen() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [area, setArea] = useState(profile?.area || "");
 
   const { user, logout } = useAuthContext();
   const router = useRouter();
+  const backgroundColor = useThemeColor({}, "background");
+
   const colorScheme = useThemeColor({}, "background") as ColorScheme;
   const colors = Colors[colorScheme] || Colors.light;
 
@@ -49,10 +44,6 @@ export default function ProfileScreen() {
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
           setError("Your session has expired. Please log in again.");
-          // Optionally, you can call logout here and redirect to login screen
-          // await logout();
-          // router.replace("/login");
-        } else {
           setError(
             `Failed to load user profile: ${
               error.response.data.message || "Unknown error"
@@ -66,48 +57,6 @@ export default function ProfileScreen() {
       setIsLoading(false);
     }
   };
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.replace("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      Alert.alert("Error", "Failed to logout. Please try again.");
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        edges={["top"]}
-      >
-        <ThemedText>Loading profile...</ThemedText>
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        edges={["top"]}
-      >
-        <ThemedText style={styles.errorText}>{error}</ThemedText>
-        <Button
-          title="Try Again"
-          onPress={fetchProfile}
-          style={styles.button}
-        />
-        <Button
-          title="Logout"
-          onPress={handleLogout}
-          style={[styles.button, styles.logoutButton]}
-        />
-      </SafeAreaView>
-    );
-  }
 
   const handleSaveChanges = async () => {
     setIsLoading(true);
@@ -146,137 +95,16 @@ export default function ProfileScreen() {
     );
   }
 
+  if (isLoading || !profile) {
+    return <LoadingState />;
+  }
+
   return (
-    <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: colors.background || "#FFFFFF" },
-      ]}
-      edges={["top"]}
-    >
+    <SafeAreaView style={[styles.container, { backgroundColor }]}>
       <ScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
-          <ThemedText style={styles.title}>User Profile</ThemedText>
-
-          <ThemedView style={styles.formContainer}>
-            <ThemedText style={styles.sectionTitle}>
-              Personal Information
-            </ThemedText>
-            <Input
-              label="Name"
-              value={profile.name}
-              onChangeText={(text) => setProfile({ ...profile, name: text })}
-              placeholder="Enter your name"
-              style={styles.input}
-              labelStyle={styles.inputLabel}
-            />
-            <Input
-              label="Email"
-              value={profile.email}
-              onChangeText={(text) => setProfile({ ...profile, email: text })}
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              style={styles.input}
-              labelStyle={styles.inputLabel}
-            />
-            <Input
-              label="Phone"
-              value={profile.phone}
-              onChangeText={(text) => setProfile({ ...profile, phone: text })}
-              placeholder="Enter your phone number"
-              keyboardType="phone-pad"
-              style={styles.input}
-              labelStyle={styles.inputLabel}
-            />
-            <Input
-              label="Constituency"
-              value={profile.constituency?.name || "Not set"}
-              onChangeText={() => {}}
-              style={
-                {
-                  ...styles.input,
-                  backgroundColor: colors.border,
-                } as ViewStyle
-              }
-              labelStyle={styles.inputLabel as TextStyle}
-              editable={false}
-            />
-            <Input
-              label="Area"
-              value={area}
-              onChangeText={(text) => setArea(text)}
-              placeholder="Enter your area"
-              style={styles.input}
-              labelStyle={styles.inputLabel}
-            />
-            <Input
-              label="Region"
-              value={profile.region?.name || "Not set"}
-              onChangeText={() => {}}
-              style={
-                {
-                  ...styles.input,
-                  backgroundColor: colors.border,
-                } as ViewStyle
-              }
-              labelStyle={styles.inputLabel as TextStyle}
-              editable={false}
-            />
-          </ThemedView>
-
-          <ThemedView style={styles.preferencesContainer}>
-            <ThemedText style={styles.sectionTitle}>
-              Notification Preferences
-            </ThemedText>
-            <ThemedView style={styles.switchContainer}>
-              <ThemedText>Email Notifications</ThemedText>
-              <Switch
-                value={profile.email_notifications}
-                onValueChange={(value) =>
-                  setProfile({ ...profile, email_notifications: value })
-                }
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={
-                  profile.email_notifications ? colors.background : colors.text
-                }
-              />
-            </ThemedView>
-            <ThemedView style={styles.switchContainer}>
-              <ThemedText>Push Notifications</ThemedText>
-              <Switch
-                value={profile.push_notifications}
-                onValueChange={(value) =>
-                  setProfile({ ...profile, push_notifications: value })
-                }
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={
-                  profile.push_notifications ? colors.background : colors.text
-                }
-              />
-            </ThemedView>
-          </ThemedView>
-
-          <Button
-            title={isLoading ? "Saving..." : "Save Changes"}
-            onPress={handleSaveChanges}
-            style={
-              [styles.button, { backgroundColor: colors.primary }] as ViewStyle
-            }
-            disabled={isLoading}
-          />
-
-          <Button
-            title="Logout"
-            onPress={handleLogout}
-            style={
-              [
-                styles.button,
-                styles.logoutButton,
-                { backgroundColor: colors.error },
-              ] as ViewStyle
-            }
-          />
-        </ThemedView>
+        <ProfileHeader profile={profile} />
+        <PersonalInfoCard profile={profile} setProfile={setProfile} />
+        <LocationCard profile={profile} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -288,49 +116,5 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-  },
-  content: {
-    padding: 16,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  formContainer: {
-    marginBottom: 20,
-  },
-  input: {
-    marginBottom: 12,
-  },
-  inputLabel: {
-    marginBottom: 4,
-  },
-  preferencesContainer: {
-    marginBottom: 20,
-  },
-  switchContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  button: {
-    marginBottom: 12,
-    paddingVertical: 12,
-  },
-  logoutButton: {
-    marginTop: 20,
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 20,
   },
 });

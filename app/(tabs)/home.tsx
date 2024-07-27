@@ -122,7 +122,9 @@ export default function HomeScreen() {
               Latest Campaigns
             </ThemedText>
             <TouchableOpacity onPress={() => setShowAllCampaigns(true)}>
-              <ThemedText type="link">See All</ThemedText>
+              <ThemedText type="link" style={styles.seeAllLink}>
+                See All
+              </ThemedText>
             </TouchableOpacity>
           </View>
           <FlatList
@@ -133,6 +135,16 @@ export default function HomeScreen() {
             keyExtractor={(item) => item.id}
             contentContainerStyle={styles.campaignPostsContainer}
           />
+        </ThemedView>
+        {/* Add a card with some design */}
+        <ThemedView style={styles.cardContainer}>
+          <ThemedView style={styles.card}>
+            <ThemedText style={styles.cardTitle}>Welcome!</ThemedText>
+            <ThemedText style={styles.cardSubtitle}>
+              Discover the power of campaigns with us.
+            </ThemedText>
+            <ThemedText style={styles.cardButton}>Get Started</ThemedText>
+          </ThemedView>
         </ThemedView>
       </ScrollView>
       <Modal
@@ -168,5 +180,35 @@ const styles = StyleSheet.create({
   },
   campaignPostsContainer: {
     paddingRight: 16,
+  },
+  seeAllLink: {
+    color: "#0200FF",
+  },
+  cardContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    padding: 16,
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  cardSubtitle: {
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  cardButton: {
+    backgroundColor: "#0200FF",
+    borderRadius: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    color: "#FFFFFF",
   },
 });

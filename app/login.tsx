@@ -3,9 +3,11 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Dimensions,
   Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
@@ -17,6 +19,7 @@ import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ThemedText } from "@/components/ThemedText";
 import { useThemeColor } from "@/hooks/useThemeColor";
+const { height } = Dimensions.get("window");
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -100,58 +103,66 @@ export default function Login() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidingView}
       >
-        <View style={styles.logoContainer}>
-          <Image
-            source={require("@/assets/images/logo.png")}
-            style={styles.logo}
-          />
-        </View>
-        <ThemedText style={styles.title}>Welcome Back!</ThemedText>
-        <View style={styles.formContainer}>
-          <View
-            style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
-          >
-            <TextInput
-              style={[styles.input, { color: textColor }]}
-              placeholder="Email"
-              placeholderTextColor={placeholderColor}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.logoContainer}>
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={styles.logo}
             />
           </View>
-          <View
-            style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
-          >
-            <TextInput
-              style={[styles.input, { color: textColor }]}
-              placeholder="Password"
-              placeholderTextColor={placeholderColor}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+          <ThemedText style={styles.title}>Welcome Back!</ThemedText>
+          <View style={styles.formContainer}>
+            <View
+              style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
+            >
+              <TextInput
+                style={[styles.input, { color: textColor }]}
+                placeholder="Email"
+                placeholderTextColor={placeholderColor}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+            <View
+              style={[styles.inputContainer, { backgroundColor: surfaceColor }]}
+            >
+              <TextInput
+                style={[styles.input, { color: textColor }]}
+                placeholder="Password"
+                placeholderTextColor={placeholderColor}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: primaryColor }]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <ThemedText style={styles.buttonText}>
+                {isLoading ? "Logging in..." : "Log In"}
+              </ThemedText>
+            </TouchableOpacity>
           </View>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: primaryColor }]}
-            onPress={handleLogin}
-            disabled={isLoading}
+            onPress={() => {
+              Alert.alert(
+                "Forgot Password",
+                "Under development. Come back later."
+              );
+            }}
           >
-            <ThemedText style={styles.buttonText}>
-              {isLoading ? "Logging in..." : "Log In"}
+            <ThemedText style={styles.forgotPassword}>
+              Forgot Password?
             </ThemedText>
           </TouchableOpacity>
-        </View>
-        <TouchableOpacity
-          onPress={() => {
-            /* Handle forgot password */
-          }}
-        >
-          <ThemedText style={styles.forgotPassword}>
-            Forgot Password?
-          </ThemedText>
-        </TouchableOpacity>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -163,10 +174,13 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingView: {
     flex: 1,
-    justifyContent: "flex-start", // Changed from "center"
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    paddingTop: 60, // Add top padding
+    paddingVertical: 40,
+    minHeight: height,
   },
   logoContainer: {
     marginBottom: 20,
@@ -182,11 +196,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center",
-    marginTop: 20,
   },
   formContainer: {
     width: "100%",
     maxWidth: 300,
+    marginBottom: 20,
   },
   inputContainer: {
     borderRadius: 10,

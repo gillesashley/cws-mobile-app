@@ -91,11 +91,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   pointsValue: {
     fontSize: 24,
-    marginVertical: 4,
+    marginVertical: 10,
   },
   equivalentText: {
     fontSize: 14,

@@ -7,8 +7,8 @@ import { CampaignPostContent } from "./campaign/CampaignPostContent";
 import { CampaignPostImage } from "./campaign/CampaignPostImage";
 
 const { width, height } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.9;
-const CARD_HEIGHT = height * 0.6;
+const CARD_WIDTH = width * 0.85;
+const CARD_HEIGHT = height * 0.55;
 
 export interface CampaignPostProps {
   id: string;
@@ -26,7 +26,7 @@ export interface CampaignPostProps {
 
 export function CampaignPost(props: CampaignPostProps) {
   const backgroundColor = useThemeColor(
-    { light: "#FFFFFF", dark: "#2C2C2C" },
+    { light: "#FFFfFF", dark: "#2C2C2C" },
     "background"
   );
   const accentColor = useThemeColor({}, "accent");
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   container: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: 20,
+    borderRadius: 16, // Reduce border radius slightly to match the smaller card size
     marginRight: 16,
     marginBottom: 16,
     shadowColor: "#000",
@@ -90,10 +90,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: "60%",
+    height: "55%", // Adjust the gradient height to match the new card size
     justifyContent: "flex-end",
   },
   contentWrapper: {
-    padding: 16,
+    padding: 12, // Slightly reduce padding for the smaller card
   },
 });

@@ -4,6 +4,8 @@ import { useThemeColor } from "@/hooks/useThemeColor";
 import React from "react";
 import { Image, StyleSheet } from "react-native";
 
+import Placeholder from "@/assets/images/no-image.png";
+
 interface PopularPostCardProps {
   title: string;
   views: number;
@@ -26,13 +28,10 @@ export const PopularPostCard: React.FC<PopularPostCardProps> = ({
     <ThemedView style={[styles.container, { backgroundColor }]}>
       <ThemedText style={styles.title}>Most Popular Post</ThemedText>
       <ThemedView style={styles.postContainer}>
-        {imageUrl ? (
-          <Image source={{ uri: imageUrl }} style={styles.image} />
-        ) : (
-          <ThemedView
-            style={[styles.image, { backgroundColor: "lightgray" }]}
-          />
-        )}
+        <Image
+          source={imageUrl ? { uri: imageUrl } : Placeholder}
+          style={styles.image}
+        />
         <ThemedView style={styles.infoContainer}>
           <ThemedText style={styles.postTitle} numberOfLines={2}>
             {title}

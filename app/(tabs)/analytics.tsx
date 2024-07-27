@@ -128,7 +128,7 @@ function AnalyticsScreen() {
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor }]}
-      edges={["top"]}
+      edges={["right", "bottom", "left"]}
     >
       <ScrollView>
         <AnalyticsHeader onInfoPress={handleInfoPress} />
@@ -139,6 +139,7 @@ function AnalyticsScreen() {
                 title="Total Posts Shared"
                 value={analyticsData.postsShared}
                 change={analyticsData.postsSharedChange}
+                icon="share-alt"
               />
             </View>
             <View style={styles.gridItem}>
@@ -146,6 +147,7 @@ function AnalyticsScreen() {
                 title="Total Likes"
                 value={analyticsData.postLikes}
                 change={analyticsData.postLikesChange}
+                icon="heart"
               />
             </View>
             <View style={styles.gridItem}>
@@ -153,6 +155,7 @@ function AnalyticsScreen() {
                 title="Total Saved"
                 value={analyticsData.postsRead}
                 change={analyticsData.postsReadChange}
+                icon="bookmark"
               />
             </View>
             <View style={styles.gridItem}>
@@ -160,6 +163,7 @@ function AnalyticsScreen() {
                 title="Total Points"
                 value={Number(analyticsData.totalPoints)}
                 change={analyticsData.totalPointsChange}
+                icon="star"
               />
             </View>
           </View>

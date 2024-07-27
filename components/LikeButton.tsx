@@ -1,11 +1,11 @@
 import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ThemedText } from "@/components/ThemedText";
+import { useUserData } from "@/components/UserDataContext";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import debounce from "lodash/debounce";
-import { useUserData } from '@/components/UserDataContext';
 import React, { useCallback, useEffect, useState } from "react";
 import { Alert, StyleSheet, TouchableOpacity } from "react-native";
 
@@ -125,5 +125,6 @@ const styles = StyleSheet.create({
   statText: {
     marginLeft: 4,
     fontSize: 14,
+    color: "#ffffff",
   },
 });
