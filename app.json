@@ -33,23 +33,10 @@
       [
         "expo-font",
         {
-          "fonts": [
-            {
-              "Inter-Black": "./assets/fonts/SpaceMono-Regular.ttf"
-            },
-            {
-              "Poppins-Bold": "./assets/fonts/Poppins-Bold.ttf"
-            },
-            {
-              "Poppins-Regular": "./assets/fonts/Poppins-Regular.ttf"
-            },
-            {
-              "Poppins-Italic": "./assets/fonts/Poppins-Italic.ttf"
-            },
-            {
-              "Poppins-SemiBold": "./assets/fonts/Poppins-SemiBold.ttf"
-            }
-          ]
+          "Poppins-Bold": "./assets/fonts/Poppins-Bold.ttf",
+          "Poppins-Regular": "./assets/fonts/Poppins-Regular.ttf",
+          "Poppins-Italic": "./assets/fonts/Poppins-Italic.ttf",
+          "Poppins-SemiBold": "./assets/fonts/Poppins-SemiBold.ttf"
         }
       ]
     ],
@@ -61,9 +48,11 @@
         "origin": false
       },
       "eas": {
-        "projectId": "ae474254-fb1b-4e49-8446-f8b3f4eb17e3"
+        "projectId": "11126f35-62bd-4a94-a398-18592203b491"
       }
     },
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": [
+      "**/*"
+    ]
   }
 }
