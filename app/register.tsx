@@ -190,10 +190,8 @@ export default function Register() {
               <Button
                 title="Next"
                 onPress={() => handleStepComplete({})}
-                backgroundColor="#FF5722"
                 style={styles.button}
                 backgroundColor="#0200FF"
-                style={styles.button }
               />
             )}
             {currentStep === RegistrationStep.Verification && (
@@ -202,7 +200,6 @@ export default function Register() {
                 onPress={handleRegister}
                 backgroundColor="#0200FF"
                 disabled={isLoading}
-                backgroundColor="#FF5722"
                 style={styles.button}
               />
             )}
