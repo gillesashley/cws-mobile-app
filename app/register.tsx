@@ -189,6 +189,7 @@ export default function Register() {
               <Button
                 title="Next"
                 onPress={() => handleStepComplete({})}
+                backgroundColor="#FF5722"
                 style={styles.button}
               />
             )}
