@@ -14,6 +14,8 @@ interface ButtonProps {
   style?: ViewStyle | ViewStyle[];
   textStyle?: TextStyle | TextStyle[];
   disabled?: boolean;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
 export function Button({
@@ -22,15 +24,20 @@ export function Button({
   style,
   textStyle,
   disabled,
+  backgroundColor: customBackgroundColor,
+  textColor: customTextColor,
 }: ButtonProps) {
-  const backgroundColor = useThemeColor(
+  const themeBackgroundColor = useThemeColor(
     { light: "#2196F3", dark: "#3F51B5" },
     "background"
   );
-  const textColor = useThemeColor(
+  const themeTextColor = useThemeColor(
     { light: "#FFFFFF", dark: "#FFFFFF" },
     "text"
   );
+
+  const backgroundColor = customBackgroundColor || themeBackgroundColor;
+  const textColor = customTextColor || themeTextColor;
 
   return (
     <TouchableOpacity
@@ -45,7 +52,7 @@ export function Button({
       <Text
         style={[
           styles.text,
-          { color: textColor },
+          { color: disabled ? "#666666" : textColor },
           ...(Array.isArray(textStyle) ? textStyle : [textStyle]),
         ]}
       >

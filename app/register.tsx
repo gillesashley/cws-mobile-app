@@ -189,12 +189,13 @@ export default function Register() {
               <Button
                 title="Next"
                 onPress={() => handleStepComplete({})}
-                style={styles.button}
+                backgroundColor="#0200FF"
+                style={styles.button }
               />
             )}
             {currentStep === RegistrationStep.Verification && (
               <Button
-                title={isLoading ? "Registering..." : "Complete Registration"}
+                title={isLoading ? "Registering..." : "Complete"}
                 onPress={handleRegister}
                 disabled={isLoading}
                 style={styles.button}
@@ -215,13 +216,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 20,
     textAlign: "center",
     opacity: 0.7,
@@ -239,9 +240,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   progressBarContainer: {
-    height: 10,
+    height: 5,
     backgroundColor: "#E0E0E0",
-    borderRadius: 5,
+    borderRadius: 15,
     marginBottom: 20,
   },
   progressBar: {
