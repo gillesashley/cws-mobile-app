@@ -146,7 +146,7 @@ export default function Login() {
               disabled={isLoading}
             >
               <ThemedText style={styles.buttonText}>
-                {isLoading ? "Logging in..." : "Log In"}
+                {isLoading ? "Logging in..." : "Login"}
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 40,
+    paddingVertical: 0,
     minHeight: height,
   },
   logoContainer: {
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   title: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "bold",
     marginBottom: 30,
     textAlign: "center",
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 50,
-    borderRadius: 25,
+    borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
     marginTop: 20,
@@ -224,8 +224,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   forgotPassword: {
+    color: "grey",
     marginTop: 20,
     textAlign: "center",
+    fontSize: 14,
     textDecorationLine: "underline",
   },
 });

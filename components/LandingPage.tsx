@@ -19,8 +19,8 @@ export default function LandingPage() {
           style={styles.logo}
           resizeMode="contain"
         />
-        <ThemedText style={styles.title}>Welcome to Campaign With Us</ThemedText>
-        <ThemedText style={styles.subtitle}>Connect with your constituency</ThemedText>
+        <ThemedText style={styles.title}>Welcome</ThemedText>
+        <ThemedText style={styles.subtitle}>Campaign With Us, Let's Win!</ThemedText>
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={[styles.button, { backgroundColor: primaryColor }]}
@@ -51,12 +51,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 150,
-    height: 150,
+    width: 120,
+    height: 120,
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
     textAlign: 'center',
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
   button: {
     height: 50,
-    borderRadius: 25,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
