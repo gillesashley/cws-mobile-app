@@ -197,6 +197,7 @@ export default function Register() {
                 title={isLoading ? "Registering..." : "Complete Registration"}
                 onPress={handleRegister}
                 disabled={isLoading}
+                backgroundColor="#FF5722"
                 style={styles.button}
               />
             )}
