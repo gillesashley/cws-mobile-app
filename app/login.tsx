@@ -56,7 +56,7 @@ export default function Login() {
         // Call the login function from AuthContext
         const loginResult = await login(email, password);
         if (loginResult) {
-          router.replace("/(tabs)/home");
+          router.replace("/(tabs)");
         } else {
           Alert.alert("Error", "Failed to save login information");
         }
