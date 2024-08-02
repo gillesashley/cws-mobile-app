@@ -182,6 +182,7 @@ export default function Register() {
               <Button
                 title="Previous"
                 onPress={handlePrevious}
+                backgroundColor="#0200FF"
                 style={styles.button}
               />
             )}
@@ -197,6 +198,7 @@ export default function Register() {
               <Button
                 title={isLoading ? "Registering..." : "Complete"}
                 onPress={handleRegister}
+                backgroundColor="#0200FF"
                 disabled={isLoading}
                 style={styles.button}
               />

@@ -66,12 +66,12 @@ const styles = StyleSheet.create({
   button: {
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 4,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
   text: {
     fontSize: 16,
-    fontWeight: "bold",
+    // fontWeight: "bold",
   },
 });
