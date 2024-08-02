@@ -190,8 +190,8 @@ export default function Register() {
               <Button
                 title="Next"
                 onPress={() => handleStepComplete({})}
-                style={styles.button}
                 backgroundColor="#0200FF"
+                style={styles.button }
               />
             )}
             {currentStep === RegistrationStep.Verification && (
