@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -15,7 +14,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { API_BASE_URL } from "@/api/api";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ThemedText } from "@/components/ThemedText";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -44,54 +42,21 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      console.log("Attempting login with email:", email);
-      const response = await axios.post(`${API_BASE_URL}/login`, {
-        email,
-        password,
-      });
-
-      console.log("Login response:", response.data);
-
-      if (response.data.token && response.data.user) {
-        // Call the login function from AuthContext
-        const loginResult = await login(email, password);
-        if (loginResult) {
-          router.replace("/(tabs)");
-        } else {
-          Alert.alert("Error", "Failed to save login information");
-        }
+      const loginResult = await login(email, password);
+      if (loginResult) {
+        router.replace("/(tabs)");
       } else {
-        Alert.alert("Error", "Invalid response from server");
+        Alert.alert(
+          "Error",
+          "Login failed. Please check your credentials and try again."
+        );
       }
     } catch (error) {
       console.error("Login error:", error);
-      if (axios.isAxiosError(error) && error.response) {
-        const { status, data } = error.response;
-
-        if (status === 422 || status === 400) {
-          // Validation error or Bad Request
-          let errorMessage = "Invalid login credentials. Please try again.";
-
-          if (data.errors && typeof data.errors === "object") {
-            const errorMessages = Object.values(data.errors).flat();
-            errorMessage = errorMessages.join("\n");
-          } else if (data.message) {
-            errorMessage = data.message;
-          }
-
-          Alert.alert("Login Failed", errorMessage);
-        } else {
-          Alert.alert(
-            "Login Failed",
-            data.message || "An unexpected error occurred"
-          );
-        }
-      } else {
-        Alert.alert(
-          "Login Failed",
-          "An unexpected error occurred. Please check your internet connection and try again."
-        );
-      }
+      Alert.alert(
+        "Login Failed",
+        "An unexpected error occurred. Please check your internet connection and try again."
+      );
     } finally {
       setIsLoading(false);
     }

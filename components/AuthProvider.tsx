@@ -74,8 +74,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         password,
       });
       const { token, user } = response.data;
-      await saveAuthState({ token, user: { ...user, token } });
-      return true;
+      if (token && user) {
+        await saveAuthState({ token, user });
+        return true;
+      } else {
+        console.error("Login response missing token or user data");
+        return false;
+      }
     } catch (error) {
       console.error("Login error:", error);
       return false;

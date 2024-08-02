@@ -51,17 +51,21 @@ export default function HomeScreen() {
 
   const loadData = useCallback(
     async (isRefreshing = false) => {
+      console.log("loadData called, isRefreshing:", isRefreshing);
       if (!token) {
+        console.log("No token found, setting error");
         setError("You must be logged in to view this content.");
         setIsLoading(false);
         setRefreshing(false);
         return;
       }
       try {
+        console.log("Fetching campaign messages and user balance");
         const [messages, balance] = await Promise.all([
           fetchCampaignMessages(token),
           fetchUserBalance(token),
         ]);
+        console.log("Data fetched successfully");
         setCampaignMessages(messages);
         setUserBalance(balance);
         updateBalance(balance);
@@ -78,7 +82,11 @@ export default function HomeScreen() {
   );
 
   useEffect(() => {
+    console.log("HomeScreen mounted, calling loadData");
     loadData();
+    return () => {
+      console.log("HomeScreen unmounting");
+    };
   }, [loadData]);
 
   const onRefresh = useCallback(() => {
