@@ -1,21 +1,19 @@
-import { useRouter } from "expo-router";
+import {useRouter} from "expo-router";
 import React, {useCallback, useEffect, useState} from "react";
-import { Alert, ScrollView, StyleSheet } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {Alert, ScrollView, StyleSheet} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
 
-import { API_BASE_URL } from "@/api/api";
-import { useAuthContext } from "@/components/AuthProvider";
-import { LoadingState } from "@/components/profile-page/LoadingState";
-import { LocationCard } from "@/components/profile-page/LocationCard";
-import { PersonalInfoCard } from "@/components/profile-page/PersonalInfoCard";
-import { ProfileHeader } from "@/components/profile-page/ProfileHeader";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/Colors";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { fetchUserProfile, UserProfile } from "@/services/services";
+import {API_BASE_URL} from "@/api/api";
+import {useAuthContext} from "@/components/AuthProvider";
+import {LocationCard} from "@/components/profile-page/LocationCard";
+import {PersonalInfoCard} from "@/components/profile-page/PersonalInfoCard";
+import {ProfileHeader} from "@/components/profile-page/ProfileHeader";
+import {ThemedText} from "@/components/ThemedText";
+import {Colors} from "@/constants/Colors";
+import {useThemeColor} from "@/hooks/useThemeColor";
+import {fetchUserProfile, UserProfile} from "@/services/services";
 import axios from "axios";
 import {Button} from "@/components/ui/Button";
-import {useAuth} from "@/hooks/useAuth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
