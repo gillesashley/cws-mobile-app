@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import { Alert, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -14,6 +14,10 @@ import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { fetchUserProfile, UserProfile } from "@/services/services";
 import axios from "axios";
+import {Button} from "@/components/ui/Button";
+import {useAuth} from "@/hooks/useAuth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 type ColorScheme = "light" | "dark";
 
@@ -22,32 +26,31 @@ export default function ProfileScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { user, logout } = useAuthContext();
+  const { token, user } = useAuthContext();
   const router = useRouter();
   const backgroundColor = useThemeColor({}, "background");
 
   const colorScheme = useThemeColor({}, "background") as ColorScheme;
   const colors = Colors[colorScheme] || Colors.light;
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async (access_token: string) => {
+    console.log(`This is my token - ${access_token}`);
     try {
       setIsLoading(true);
       setError(null);
-      const userData = await fetchUserProfile(user.token);
+
+      const userData = await fetchUserProfile(access_token!);
       setProfile(userData);
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      // console.error("Error fetching user profile:", error);
+      console.log(error);
       if (axios.isAxiosError(error) && error.response) {
         if (error.response.status === 401) {
           setError("Your session has expired. Please log in again.");
           setError(
-            `Failed to load user profile: ${
-              error.response.data.message || "Unknown error"
-            }`
+              `Failed to load user profile: ${
+                  error.response.data.message || "Unknown error"
+              }`
           );
         }
       } else {
@@ -56,7 +59,11 @@ export default function ProfileScreen() {
     } finally {
       setIsLoading(false);
     }
-  };
+  },[]);
+
+  useEffect(() => {
+    fetchProfile(token!).catch(error => console.log(error));
+  }, [fetchProfile, token]);
 
   const handleSaveChanges = async () => {
     setIsLoading(true);
@@ -95,8 +102,29 @@ export default function ProfileScreen() {
     );
   }
 
-  if (isLoading || !profile) {
-    return <LoadingState />;
+  const logoutUser = async (access_token: string) => {
+    try {
+      // Call your API to invalidate the token if necessary
+      await axios.post(
+          `${API_BASE_URL}/logout`,
+          {},
+          {
+            headers: { Authorization: `Bearer ${access_token}` },
+          }
+      );
+
+      // Clear the stored auth state
+      await AsyncStorage.removeItem("authState");
+      // setAuthState({ token: null, user: null });
+      return true;
+    } catch (error) {
+      console.error("Logout error:", error);
+      return false;
+    }
+  };
+
+  const logout = () => {
+    logoutUser(token!).then(res => router.replace('/login'));
   }
 
   return (
@@ -105,6 +133,7 @@ export default function ProfileScreen() {
         <ProfileHeader profile={profile} />
         <PersonalInfoCard profile={profile} setProfile={setProfile} />
         <LocationCard profile={profile} />
+        <Button onPress={logout} title={"Logout"}/>
       </ScrollView>
     </SafeAreaView>
   );

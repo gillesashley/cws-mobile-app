@@ -73,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email,
         password,
       });
-      const { token, user } = response.data;
+      const {access_token: token, user } = response.data;
       if (token && user) {
         await saveAuthState({ token, user });
         return true;

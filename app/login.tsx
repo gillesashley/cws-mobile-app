@@ -44,7 +44,7 @@ export default function Login() {
     try {
       const loginResult = await login(email, password);
       if (loginResult) {
-        router.replace("/(tabs)");
+        router.replace("/home");
       } else {
         Alert.alert(
           "Error",
