@@ -105,9 +105,9 @@ export function useAuth() {
 
   return {
     isAuthenticated,
-    user: authState.user,
     login,
     register,
     logout,
+    ...authState
   };
 }

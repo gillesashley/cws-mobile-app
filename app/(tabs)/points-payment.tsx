@@ -1,19 +1,19 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React, { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuthContext } from "@/components/AuthProvider";
-import PointsBalance from "@/components/points-payments/PointBalance";
-import WithdrawalForm from "@/components/points-payments/WithdrawalForm";
-import WithdrawalHistoryItem from "@/components/points-payments/WithdrawalHistoryItem";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/ui/Button";
-import { useThemeColor } from "@/hooks/useThemeColor";
-import { buildApiUrl, fetchPointsData, PointsData, submitWithdrawalRequest, useAxios } from "@/services/services";
-import useSWR, { mutate } from "swr";
-import useSWRMutation from "swr/dist/mutation";
-import { z } from "zod";
+import { useAuthContext } from '@/components/AuthProvider';
+import PointsBalance from '@/components/points-payments/PointBalance';
+import WithdrawalForm from '@/components/points-payments/WithdrawalForm';
+import WithdrawalHistoryItem from '@/components/points-payments/WithdrawalHistoryItem';
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { Button } from '@/components/ui/Button';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { buildApiUrl, fetchPointsData, PointsData, submitWithdrawalRequest, useAxios } from '@/services/services';
+import useSWR, { mutate } from 'swr';
+import useSWRMutation from 'swr/dist/mutation';
+import { z } from 'zod';
 
 const zPointWithdrawals = z.object({
 	balance: z.number(),
@@ -22,11 +22,11 @@ const zPointWithdrawals = z.object({
 			id: z
 				.string()
 				.or(z.number())
-				.transform(d => d + ""),
+				.transform(d => d + ''),
 			amount: z
 				.number()
 				.or(z.string())
-				.transform(d => Number(d??0)),
+				.transform(d => Number(d ?? 0)),
 			status: z.string(),
 			created_at: z
 				.date()
@@ -51,7 +51,7 @@ export default function PointsPaymentScreen() {
 		isLoading,
 		isValidating: refreshing,
 		mutate: onRefresh
-	} = useSWR({ url: buildApiUrl("/points"), auth }, ({ url }) =>
+	} = useSWR({ url: buildApiUrl('/points'), auth }, ({ url }) =>
 		axios()
 			.get(url)
 			.then(d => zPointWithdrawals.parse(d.data))
@@ -61,7 +61,7 @@ export default function PointsPaymentScreen() {
 		trigger,
 		isMutating: isSubmitting,
 		error: error
-	} = useSWRMutation({ url: buildApiUrl("/reward-withdrawals"), amount: 0 }, ({ url }, { arg }: { arg: { amount: number } }) => {
+	} = useSWRMutation({ url: buildApiUrl('/reward-withdrawals'), amount: 0 }, ({ url }, { arg }: { arg: { amount: number } }) => {
 		return axios()
 			.post(url, arg)
 			.then(d => d.data);
@@ -70,27 +70,16 @@ export default function PointsPaymentScreen() {
 	const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
 
 	const { token } = auth;
-	const backgroundColor = useThemeColor({}, "background");
+	const backgroundColor = useThemeColor({}, 'background');
 
 	const handleWithdrawalRequest = async (amount: number) => {
-		if (!token) {
-			// setError('You must be logged in to make a withdrawal');
-			return;
-		}
-
-		try {
-			await trigger({ token, amount }, { onSuccess: () => [onRefresh(), setShowWithdrawalForm(false)] });
-			Alert.alert("Success", "Withdrawal request submitted successfully");
-		} catch (error) {
-			console.error("Error submitting withdrawal request:", error);
-			if (error instanceof Error) {
-				// setError(`Failed to submit withdrawal request: ${error.message}`);
-			} else {
-				// setError('An unexpected error occurred. Please try again later.');
+		await trigger(
+			{ amount },
+			{
+				onSuccess: () => [Alert.alert('Success', 'Withdrawal request submitted successfully'), onRefresh(), setShowWithdrawalForm(false)],
+				onError: err => console.error('Error submitting withdrawal request:', error)
 			}
-		} finally {
-			// setIsSubmitting(false);
-		}
+		);
 	};
 
 	console.log({ pointsData });
@@ -125,12 +114,12 @@ export default function PointsPaymentScreen() {
 	if (isLoading) {
 		return (
 			<SafeAreaView style={[styles.container, { backgroundColor }]}>
-				<ActivityIndicator size="large" color={useThemeColor({}, "text")} />
+				<ActivityIndicator size="large" color={useThemeColor({}, 'text')} />
 			</SafeAreaView>
 		);
 	}
 
-	if (error && error.includes("Points feature is not available")) {
+	if (error && error.includes('Points feature is not available')) {
 		return (
 			<SafeAreaView style={[styles.container, { backgroundColor }]}>
 				<ThemedView style={styles.content}>
@@ -143,7 +132,7 @@ export default function PointsPaymentScreen() {
 	}
 
 	return (
-		<SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
+		<SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
 			<FlatList
 				data={pointsData?.withdrawalHistory}
 				renderItem={({ item }) => <WithdrawalHistoryItem withdrawal={item} />}
@@ -168,7 +157,7 @@ const styles = StyleSheet.create({
 		marginBottom: 16
 	},
 	errorText: {
-		color: "red",
+		color: 'red',
 		marginBottom: 16
 	},
 	historyTitle: {
@@ -176,7 +165,7 @@ const styles = StyleSheet.create({
 		marginBottom: 16
 	},
 	emptyText: {
-		textAlign: "center",
+		textAlign: 'center',
 		marginTop: 16
 	},
 	titleContainer: {
@@ -184,13 +173,13 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		fontSize: 24,
-		fontWeight: "bold",
+		fontWeight: 'bold',
 		marginBottom: 8
 	},
 	titleUnderline: {
 		height: 3,
 		width: 60,
-		backgroundColor: useThemeColor({}, "accent"),
+		backgroundColor: useThemeColor({}, 'accent'),
 		borderRadius: 2
 	}
 });
