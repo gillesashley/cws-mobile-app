@@ -73,28 +73,31 @@ export default function Register() {
         setIsLoading(true);
         try {
             const registrationData = new FormData();
-            Object.keys(formData).forEach((key) => {
-                const value = formData[key as keyof typeof formData];
-                if (value !== null && value !== undefined) {
-                    if (key === "dateOfBirth") {
-                        registrationData.append(key, (value as Date).toISOString().split("T")[0]);
-                    } else if (key === "ghanaCardImage" && typeof value === "string") {
-                        const uriParts = value.split(".");
-                        const fileType = uriParts[uriParts.length - 1];
-                        registrationData.append("ghana_card_image", {
-                            uri: value,
-                            name: `ghana_card.${fileType}`,
-                            type: `image/${fileType}`,
-                        } as any);
-                    } else {
-                        registrationData.append(key, value.toString());
-                    }
-                }
-            });
+
+            // Append all form fields to FormData
+            registrationData.append('name', formData.name);
+            registrationData.append('email', formData.email);
+            registrationData.append('password', formData.password);
+            registrationData.append('phone', formData.phone);
+            registrationData.append('date_of_birth', formData.dateOfBirth.toISOString().split('T')[0]);
+            registrationData.append('ghana_card_id', formData.ghanaCardId);
+            registrationData.append('region_id', formData.regionId);
+            registrationData.append('constituency_id', formData.constituencyId);
+            registrationData.append('area', formData.area);
+
+            // Handle Ghana Card Image
+            if (formData.ghanaCardImage) {
+                const uriParts = formData.ghanaCardImage.split('.');
+                const fileType = uriParts[uriParts.length - 1];
+                registrationData.append('ghana_card_image', {
+                    uri: formData.ghanaCardImage,
+                    name: `ghana_card.${fileType}`,
+                    type: `image/${fileType}`,
+                } as any);
+            }
 
             // Log the FormData contents for debugging
-            console.log("Registration data:");
-            for (const [key, value] of registrationData.entries()) {
+            for (let [key, value] of registrationData.entries()) {
                 console.log(key, value);
             }
 
