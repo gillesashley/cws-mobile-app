@@ -73,27 +73,28 @@ export default function Register() {
         setIsLoading(true);
         try {
             const registrationData = new FormData();
-            Object.entries(formData).forEach(([key, value]) => {
-                if (key === "dateOfBirth") {
-                    registrationData.append(
-                        key,
-                        (value as Date).toISOString().split("T")[0]
-                    );
-                } else if (key === "ghanaCardImage" && value) {
-                    const uriParts = (value as string).split(".");
-                    const fileType = uriParts[uriParts.length - 1];
-                    registrationData.append("ghana_card_image", {
-                        uri: value,
-                        name: `ghana_card.${fileType}`,
-                        type: `image/${fileType}`,
-                    } as any);
-                } else if (value !== null && value !== undefined) {
-                    registrationData.append(key, value.toString());
+            Object.keys(formData).forEach((key) => {
+                const value = formData[key as keyof typeof formData];
+                if (value !== null && value !== undefined) {
+                    if (key === "dateOfBirth") {
+                        registrationData.append(key, (value as Date).toISOString().split("T")[0]);
+                    } else if (key === "ghanaCardImage" && typeof value === "string") {
+                        const uriParts = value.split(".");
+                        const fileType = uriParts[uriParts.length - 1];
+                        registrationData.append("ghana_card_image", {
+                            uri: value,
+                            name: `ghana_card.${fileType}`,
+                            type: `image/${fileType}`,
+                        } as any);
+                    } else {
+                        registrationData.append(key, value.toString());
+                    }
                 }
             });
 
             // Log the FormData contents for debugging
-            for (let [key, value] of registrationData.entries()) {
+            console.log("Registration data:");
+            for (const [key, value] of registrationData.entries()) {
                 console.log(key, value);
             }
 
@@ -108,10 +109,11 @@ export default function Register() {
         } catch (error) {
             console.error("Registration error:", error);
             if (axios.isAxiosError(error) && error.response) {
-                // Log the full error response
                 console.error("Error response:", error.response.data);
+                Alert.alert("Error", `Registration failed: ${error.response.data.message || "Unknown error"}`);
+            } else {
+                Alert.alert("Error", "An unexpected error occurred");
             }
-            Alert.alert("Error", "An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }

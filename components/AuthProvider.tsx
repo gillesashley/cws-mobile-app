@@ -87,7 +87,7 @@ export function AuthProvider({children}: { children: React.ReactNode }) {
         }
     };
 
-    const register = async (userData: FormData) => {
+    const register = async (userData: FormData): Promise<boolean> => {
         try {
             console.log("Registering with data:", Object.fromEntries(userData));
             const response = await axios.post(`${API_BASE_URL}/register`, userData, {
