@@ -1,10 +1,10 @@
-import axios from 'axios';
-// export const API_BASE_URL = "http://localhost:8080/api";
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'https://campaignwithus.com/public/api';
 
+import axios from "axios";
+// export const API_BASE_URL = "http://localhost:8080/api";
+export const API_BASE_URL = "https://campaignwithus.com/public/api";
 export const Api = () => {
-	return axios.create({
-		baseURL: API_BASE_URL,
-		timeout: 80000,
-	});
-};
+    return axios.create({
+        baseURL : API_BASE_URL,
+        timeout: 80000,
+    })
+}
