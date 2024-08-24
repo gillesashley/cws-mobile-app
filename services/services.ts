@@ -1,13 +1,14 @@
+import envService  from '@/services/envService';
 // app/services/regionService.ts
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import { API_BASE_URL } from '@/api/api';
 import axios from 'axios';
 import { ParseReturnType, z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthContext } from '@/components/AuthProvider';
 
+const API_BASE_URL = envService.api_url
 export interface Region {
 	id: number;
 	name: string;

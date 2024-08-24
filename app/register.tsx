@@ -25,7 +25,7 @@ import VerificationStep from "@/components/registration/VerificationStep";
 enum RegistrationStep {
     Credentials = 1,
     Location = 2,
-    Verification = 3,
+    Verification = 3
 }
 
 const {width} = Dimensions.get("window");
@@ -39,6 +39,7 @@ export default function Register() {
         name: "",
         email: "",
         password: "",
+        password_confirmation:"",
         regionId: "",
         constituencyId: "",
         phone: "",
@@ -54,19 +55,24 @@ export default function Register() {
     const backgroundColor = useThemeColor({}, "background");
     const primaryColor = useThemeColor({}, "primary");
 
-    const handleStepComplete = (stepData: Partial<typeof formData>) => {
-        setFormData({...formData, ...stepData});
-        if (currentStep < RegistrationStep.Verification) {
-            setCurrentStep(currentStep + 1);
-        } else {
-            handleRegister();
-        }
+    const onChange = (stepData: Partial<typeof formData>) => {
+        console.log({currentStep,stepData})
+        setFormData((prev)=>({...prev, ...stepData}));
+        // if (currentStep < RegistrationStep.Verification) {
+        //     setCurrentStep(currentStep + 1);
+        // } else {
+        //     handleRegister();
+        // }
     };
 
-    const handlePrevious = () => {
-        if (currentStep > RegistrationStep.Credentials) {
-            setCurrentStep(currentStep - 1);
-        }
+    const handleNext = (change=0) => {
+        // if (currentStep > RegistrationStep.Credentials) {
+        //     setCurrentStep(currentStep - 1);
+        // }
+
+        const tempNextStep = currentStep+change
+        if (!(0<=tempNextStep && tempNextStep<= Object.values(RegistrationStep).length))return;
+        setCurrentStep(tempNextStep);
     };
 
     const handleRegister = async () => {
@@ -78,6 +84,7 @@ export default function Register() {
             registrationData.append('name', formData.name);
             registrationData.append('email', formData.email);
             registrationData.append('password', formData.password);
+            registrationData.append('password_confirmation', formData.password_confirmation);
             registrationData.append('phone', formData.phone);
             registrationData.append('date_of_birth', formData.dateOfBirth.toISOString().split('T')[0]);
             registrationData.append('ghana_card_id', formData.ghanaCardId);
@@ -96,16 +103,13 @@ export default function Register() {
                 } as any);
             }
 
-            // Log the FormData contents for debugging
-            for (let [key, value] of registrationData.entries()) {
-                console.log(key, value);
-            }
-
+           
             const success = await register(registrationData);
             if (success) {
+                Platform.OS!=='web'?
                 Alert.alert("Success", "Registration successful", [
                     {text: "OK", onPress: () => router.replace("/login")},
-                ]);
+                ]):window.confirm('Success: Registration successfull') && router.push('/login');
             } else {
                 Alert.alert("Registration Failed", "Please try again");
             }
@@ -127,21 +131,21 @@ export default function Register() {
             case RegistrationStep.Credentials:
                 return (
                     <CredentialsStep
-                        onComplete={handleStepComplete}
+                        onChange={onChange}
                         initialData={formData}
                     />
                 );
             case RegistrationStep.Location:
                 return (
                     <LocationStep
-                        onComplete={handleStepComplete}
+                        onChange={onChange}
                         initialData={formData}
                     />
                 );
             case RegistrationStep.Verification:
                 return (
                     <VerificationStep
-                        onComplete={handleStepComplete}
+                        onChange={onChange}
                         initialData={formData}
                     />
                 );
@@ -202,7 +206,7 @@ export default function Register() {
                         {currentStep > RegistrationStep.Credentials && (
                             <Button
                                 title="Previous"
-                                onPress={handlePrevious}
+                                onPress={()=>handleNext(-1)}
                                 backgroundColor="#0200FF"
                                 style={styles.button}
                             />
@@ -210,7 +214,7 @@ export default function Register() {
                         {currentStep < RegistrationStep.Verification && (
                             <Button
                                 title="Next"
-                                onPress={() => handleStepComplete({})}
+                                onPress={() => handleNext(1)}
                                 backgroundColor="#0200FF"
                                 style={styles.button}
                             />
