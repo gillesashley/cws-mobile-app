@@ -116,6 +116,13 @@ export default function Login() {
             </TouchableOpacity>
           </View>
           <TouchableOpacity
+            onPress={() => router.push('/register')}
+          >
+            <ThemedText style={styles.forgotPassword}>
+              Register
+            </ThemedText>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => {
               Alert.alert(
                 "Forgot Password",

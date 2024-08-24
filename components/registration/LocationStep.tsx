@@ -10,7 +10,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 
 interface LocationStepProps {
-  onComplete: (data: {
+  onChange: (data: {
     regionId: string;
     constituencyId: string;
     area: string;
@@ -19,7 +19,7 @@ interface LocationStepProps {
 }
 
 export default function LocationStep({
-  onComplete,
+  onChange,
   initialData,
 }: LocationStepProps) {
   const [regions, setRegions] = useState<Region[]>([]);
@@ -39,6 +39,10 @@ export default function LocationStep({
       loadConstituencies(regionId);
     }
   }, [regionId]);
+
+  useEffect(()=>{
+    onChange({regionId,constituencyId,area})
+  },[regionId,constituencyId,area])
 
   const loadRegions = async () => {
     try {
@@ -63,7 +67,7 @@ export default function LocationStep({
   };
 
   const handleNext = () => {
-    onComplete({ regionId, constituencyId, area });
+    onChange({ regionId, constituencyId, area });
   };
 
   return (
