@@ -3,12 +3,16 @@ import envService  from '@/services/envService';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { ParseReturnType, z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthContext } from '@/components/AuthProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const API_BASE_URL = envService.api_url
+
+axios.defaults.baseURL = envService.api_url
+
 export interface Region {
 	id: number;
 	name: string;
@@ -60,9 +64,10 @@ export interface WithdrawalRequest {
 
 export const buildApiUrl = (params: `/${string}`, baseUrl = API_BASE_URL) => baseUrl + params;
 
+
 export const fetchRegions = async (): Promise<Region[]> => {
 	try {
-		const response = await axios.get(`${API_BASE_URL}/regions`);
+		const response = await axios.get(`/regions`);
 		return response.data.data;
 	} catch (error) {
 		console.error('Error fetching regions:', error);
@@ -72,7 +77,7 @@ export const fetchRegions = async (): Promise<Region[]> => {
 
 export const fetchConstituencies = async (regionId: number): Promise<Constituency[]> => {
 	try {
-		const response = await axios.get(`${API_BASE_URL}/regions/${regionId}/constituencies`);
+		const response = await axios.get(`/regions/${regionId}/constituencies`);
 		return response.data.data;
 	} catch (error) {
 		console.error('Error fetching constituencies:', error);
@@ -80,21 +85,23 @@ export const fetchConstituencies = async (regionId: number): Promise<Constituenc
 	}
 };
 
-export const fetchCampaignMessages = async (token: string): Promise<CampaignMessage[]> => {
-	try {
-		const response = await axios.get(`${API_BASE_URL}/campaign-messages`, {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		return response.data.data;
-	} catch (error) {
-		console.error('Error fetching campaign messages:', error);
-		throw error;
-	}
+export const fetchCampaignMessages = async (): Promise<CampaignMessage[]> => {
+	// try {
+	// 	const response = await axios.get(`/campaign-messages`, {
+	// 		headers: { Authorization: `Bearer ${token}` },
+	// 	});
+	// 	return response.data.data;
+	// } catch (error) {
+	// 	console.error('Error fetching campaign messages:', error);
+	// 	throw error;
+	// }
+
+	return await axios.get('/campaign-messages')
 };
 
 export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
 	try {
-		const response = await axios.get(`${API_BASE_URL}/user-profile`, {
+		const response = await axios.get(`/user-profile`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		console.log(response.data);
@@ -111,7 +118,7 @@ export const fetchUserProfile = async (token: string): Promise<UserProfile> => {
 
 export const fetchPointsData = async (token: string): Promise<PointsData> => {
 	try {
-		const response = await axios.get(`${API_BASE_URL}/points`, {
+		const response = await axios.get(`/points`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		const data = response.data;
@@ -156,7 +163,7 @@ export const fetchPointsData = async (token: string): Promise<PointsData> => {
 
 export const fetchWithdrawalRequests = async (token: string): Promise<WithdrawalRequest[]> => {
 	try {
-		const response = await axios.get(`${API_BASE_URL}/reward-withdrawals`, {
+		const response = await axios.get(`/reward-withdrawals`, {
 			headers: { Authorization: `Bearer ${token}` },
 		});
 		return response.data.data;
@@ -169,7 +176,7 @@ export const fetchWithdrawalRequests = async (token: string): Promise<Withdrawal
 export const updateWithdrawalStatus = async (token: string, withdrawalId: number, status: 'approved' | 'rejected', rejectionReason?: string): Promise<void> => {
 	try {
 		await axios.put(
-			`${API_BASE_URL}/reward-withdrawals/${withdrawalId}`,
+			`/reward-withdrawals/${withdrawalId}`,
 			{ status, rejection_reason: rejectionReason },
 			{ headers: { Authorization: `Bearer ${token}` } }
 		);
@@ -181,7 +188,7 @@ export const updateWithdrawalStatus = async (token: string, withdrawalId: number
 
 export const submitWithdrawalRequest = async (token: string, amount: number): Promise<void> => {
 	try {
-		await axios.post(`${API_BASE_URL}/reward-withdrawals`, { amount }, { headers: { Authorization: `Bearer ${token}` } });
+		await axios.post(`/reward-withdrawals`, { amount }, { headers: { Authorization: `Bearer ${token}` } });
 	} catch (error) {
 		if (axios.isAxiosError(error)) {
 			console.error('Error submitting withdrawal request:', error.message);
@@ -193,22 +200,23 @@ export const submitWithdrawalRequest = async (token: string, amount: number): Pr
 	}
 };
 
-export const fetchUserBalance = async (token: string): Promise<number> => {
-	try {
-		console.log('Fetching user balance with token:', token);
-		const response = await axios.get(`${API_BASE_URL}/user-balance`, {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		console.log('User balance response:', response.data);
-		return response.data.balance;
-	} catch (error) {
-		if (axios.isAxiosError(error)) {
-			console.error('Error fetching user balance:', error.response?.status, error.response?.data);
-		} else {
-			console.error('Unexpected error:', error);
-		}
-		throw error;
-	}
+export const fetchUserBalance = async (): Promise<number> => {
+	// try {
+	// 	console.log('Fetching user balance with token:', token);
+	// 	const response = await axios.get(`/user-balance`, {
+	// 		headers: { Authorization: `Bearer ${token}` },
+	// 	});
+	// 	console.log('User balance response:', response.data);
+	// 	return response.data.balance;
+	// } catch (error) {
+	// 	if (axios.isAxiosError(error)) {
+	// 		console.error('Error fetching user balance:', error.response?.status, error.response?.data);
+	// 	} else {
+	// 		console.error('Unexpected error:', error);
+	// 	}
+	// 	throw error;
+	// }
+	return axios.get(buildApiUrl('/user-balance'))
 };
 
 const zPointTransaction = z.object({
@@ -220,7 +228,7 @@ const zPointTransaction = z.object({
 export type SWROptions = Parameters<typeof useSWR>['2'];
 
 export const useMxPointTransaction = (data: typeof zPointTransaction._type, options?: SWROptions) => {
-	const axios = useAxios();
+	const axios = useApi();
 	const req = useSWR(
 		{ url: 'point-transactions', data },
 		({ url, data }) => {
@@ -235,7 +243,7 @@ export const useMxPointTransaction = (data: typeof zPointTransaction._type, opti
 				}))
 				.parse(data);
 
-			return axios()
+			return axios.axiosInstance
 				.post(buildApiUrl(`/point-transactions`), _data)
 				.then((r) => r.data);
 		},
@@ -244,14 +252,29 @@ export const useMxPointTransaction = (data: typeof zPointTransaction._type, opti
 	return req;
 };
 
-export const useAxios = () => {
+export const useApi = () => {
 	const auth = useAuthContext();
 
-	return (tokenize = true) => {
-		const axiosInstance = axios.create({
-			headers: tokenize ? { Authorization: `Bearer ${auth.token}` } : {},
-		});
+	const axiosInstance = axios.create();
 
-		return axiosInstance;
+	axiosInstance.interceptors.request.use(req=>{
+		if (!req.headers.skipAuthorization){
+			req.headers.Authorization = 'Bearer '+auth.token
+		}
+		return req
+	})
+
+
+
+	
+	return {axiosInstance,
+		getCampaignsConstituency: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data)),
+		getCampaignsRegional: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data)),
+		getCampaignsNational: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data)),
+		getUserBalance: ()=>useSWR<{balance:number},AxiosError>('/user-balance',()=> axiosInstance.get('/user-balance').then(r=>r.data)),
+		getWithdrawals: ()=>useSWR<any,AxiosError>('/reward-withdrawals',()=>axiosInstance.get('/reward-withdrawals').then(r=>r.data)),
+		getPoints: ()=>useSWR<PointsData,AxiosError>('/points',()=>axiosInstance.get('/points').then(r=>r.data)),
+		getUserProfile: ()=>useSWR<UserProfile,AxiosError>('/user-profile',()=>axiosInstance.get('/user-profile').then(r=>r.data)),
 	};
+	
 };
