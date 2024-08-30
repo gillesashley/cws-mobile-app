@@ -1,5 +1,6 @@
 {
   "expo": {
+    "jsEngine":"hermes",
     "name": "cws-mobile-app",
     "slug": "cws-mobile-app",
     "version": "1.0.0",
@@ -48,11 +49,12 @@
         "origin": false
       },
       "eas": {
-        "projectId": "11126f35-62bd-4a94-a398-18592203b491"
+        "projectId": "4cf5104b-aa77-403c-9301-51e2bf6a19a0"
       }
     },
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "owner": "teczaleel"
   }
 }
