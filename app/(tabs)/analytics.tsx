@@ -5,6 +5,7 @@ import { StatisticCard } from "@/components/analytics/StatisticsCard";
 import { UserActivityBreakdown } from "@/components/analytics/UserActivityBreakdown";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ExpoErrorBoundary } from "@/components/ErrorBoundary";
+import { LoadingState } from "@/components/profile-page/LoadingState";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
@@ -97,9 +98,7 @@ function AnalyticsScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ActivityIndicator size="large" color={textColor} />
-      </SafeAreaView>
+      <LoadingState />
     );
   }
 
