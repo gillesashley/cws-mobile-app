@@ -4,6 +4,9 @@
   },
   "build": {
     "development": {
+      "env":{
+        "EXPO_PUBLIC_API_URL":"https://campaignwithus.com/api"
+      },
       "developmentClient": true,
       "distribution": "internal",
       "android": {
@@ -11,9 +14,15 @@
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env":{
+        "EXPO_PUBLIC_API_URL":"https://campaignwithus.com/api"
+      }
     },
     "production": {
+      "env":{
+        "EXPO_PUBLIC_API_URL":"https://campaignwithus.com/api"
+      },
       "android": {
         "buildType": "apk"
       }

@@ -24,7 +24,7 @@ const { height } = Dimensions.get('window');
 export default function Login() {
 	const { control, handleSubmit } = useForm({
 		defaultValues: {
-			email: 'ureichert@example.org' as any as string,
+			email: 'champlin.eda@example.com' as any as string,
 			password: 'password' as any as string,
 		},
 	});
@@ -44,7 +44,6 @@ type Creds = Parameters<Parameters<typeof handleSubmit>[0]>[0]
 	const placeholderColor = useThemeColor({}, 'placeholder');
 
 	const handleLogin = async (creds: Creds) => {
-		console.log({ creds });
 		if (Object.values(creds).some(c => ['', null, undefined].includes(c))) {
 			Alert.alert('Error', 'Please fill in all fields');
 			return;
