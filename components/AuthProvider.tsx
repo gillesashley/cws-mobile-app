@@ -20,13 +20,13 @@ interface AuthContextType {
 	error: any | null;
 }
 
-const AuthContext = createContext<AuthContextType|undefined> (undefined);
+const AuthContext = createContext<AuthContextType |undefined >(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const [authState, setAuthState] =
 		useState <
-		AuthState >(
-		{
+		AuthState >
+		({
 			token: null,
 			user: null,
 			error: null
@@ -34,8 +34,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		loadAuthState();
+		axios.interceptors.request.use(
+			(config) => {
+				const { url, method } = config;
+				console.log("cws::network_request:", { method, url });
+				return config;
+			},
+			(error) => {
+				return Promise.reject(error);
+			}
+		);
+
 		axios.interceptors.response.use(
-			(response) => response,
+			(response) => {
+				console.log("cws::network_response:", {
+					url: response.config.url,
+					method: response.config.method,
+					status: response.status
+				});
+				return response;
+			},
 			(error) => {
 				if (axios.isAxiosError(error) && error.response && error.response.status === 401) {
 					// Handle authorization error here
