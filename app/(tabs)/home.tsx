@@ -18,6 +18,7 @@ import { useThemeColor } from '@/hooks/useThemeColor';
 import { CampaignMessage, fetchCampaignMessages, fetchUserBalance, useApi } from '@/services/services';
 import useSWR from 'swr';
 import { AxiosError } from 'axios';
+import { LoadingState } from '@/components/profile-page/LoadingState';
 
 type RootStackParamList = {
 	PointsPayment: undefined;
@@ -77,7 +78,7 @@ export default function HomeScreen() {
 	if (isLoading) {
 		return (
 			<SafeAreaView style={[styles.container, { backgroundColor }]}>
-				<ActivityIndicator size='large' color={useThemeColor({}, 'text')} />
+				<LoadingState />
 			</SafeAreaView>
 		);
 	}

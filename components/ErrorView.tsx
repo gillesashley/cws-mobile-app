@@ -16,11 +16,11 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
 	const auth = useAuthContext();
 
 	return (
-		<View style={styles.container}>
+		<View style={styles.container} className="flex flex-col gap-10">
 			<ThemedText style={styles.errorText}>{error}</ThemedText>
 			<ThemedText style={styles.errorText}>{auth.error?.message}</ThemedText>
 			<Button title="Try Again" onPress={onRetry} style={styles.button} />
-			{auth.error ? <Button title="login" onPress={() => nav.navigate("login")} /> : <></>}
+			 <Button title="login" onPress={() => auth.logout().then(()=>nav.navigate("login"))} /> 
 		</View>
 	);
 };

@@ -3,7 +3,7 @@ import envService  from '@/services/envService';
 import useSWR from 'swr';
 import useSWRMutation from 'swr/mutation';
 
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ParseReturnType, z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { useAuthContext } from '@/components/AuthProvider';
@@ -23,6 +23,9 @@ export interface Constituency {
 	name: string;
 }
 
+export const zConstituency = z.object({id:z.string(),name:z.string()})
+export const zRegion = z.object({id:z.string(),name:z.string()})
+
 export interface UserProfile {
 	name: string;
 	email: string;
@@ -33,6 +36,21 @@ export interface UserProfile {
 	email_notifications: boolean;
 	push_notifications: boolean;
 }
+
+export const zUserProfile = z.object({
+	name: z.string(),
+	email: z.string(),
+	phone: z.string(),
+	constituency: z.optional(zConstituency),
+	area: z.string(),
+	region: z.optional(zRegion),
+	region_id: z.optional(z.string()),
+	constituency_id: z.optional(z.string()),
+	email_notifications: z.boolean(),
+	push_notifications: z.boolean(),
+})
+
+export const zNewUserProfile = zUserProfile.omit({region:true,constituency:true})
 
 export interface CampaignMessage {
 	id: string;
@@ -219,11 +237,13 @@ export const fetchUserBalance = async (): Promise<number> => {
 	return axios.get(buildApiUrl('/user-balance'))
 };
 
-const zPointTransaction = z.object({
+export const zPointTransaction = z.object({
 	userId: z.string(),
 	messageId: z.string(),
 	points: z.number().optional(),
 });
+
+
 
 export type SWROptions = Parameters<typeof useSWR>['2'];
 
@@ -271,10 +291,11 @@ export const useApi = () => {
 		getCampaignsConstituency: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data)),
 		getCampaignsRegional: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data)),
 		getCampaignsNational: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data)),
-		getUserBalance: ()=>useSWR<{balance:number},AxiosError>('/user-balance',()=> axiosInstance.get('/user-balance').then(r=>r.data)),
-		getWithdrawals: ()=>useSWR<any,AxiosError>('/reward-withdrawals',()=>axiosInstance.get('/reward-withdrawals').then(r=>r.data)),
-		getPoints: ()=>useSWR<PointsData,AxiosError>('/points',()=>axiosInstance.get('/points').then(r=>r.data)),
-		getUserProfile: ()=>useSWR<UserProfile,AxiosError>('/user-profile',()=>axiosInstance.get('/user-profile').then(r=>r.data)),
+		getUserBalance: ()=>useSWR<{balance:number},AxiosError>('/user-balance',(key)=> axiosInstance.get(key).then(r=>r.data)),
+		getWithdrawals: ()=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data)),
+		getPoints: ()=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data)),
+		getUserProfile: ()=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data)),
+		mxUpdateUserProfile:()=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/update-user',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axios.put(url,args) as any) 
 	};
 	
 };

@@ -1,150 +1,82 @@
-import {useRouter} from "expo-router";
-import React, {useCallback, useEffect, useState} from "react";
-import {Alert, ScrollView, StyleSheet} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, ScrollView, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import {API_BASE_URL} from "@/api/api";
-import {useAuthContext} from "@/components/AuthProvider";
-import {LocationCard} from "@/components/profile-page/LocationCard";
-import {PersonalInfoCard} from "@/components/profile-page/PersonalInfoCard";
-import {ProfileHeader} from "@/components/profile-page/ProfileHeader";
-import {ThemedText} from "@/components/ThemedText";
-import {Colors} from "@/constants/Colors";
-import {useThemeColor} from "@/hooks/useThemeColor";
-import {fetchUserProfile, UserProfile} from "@/services/services";
+import { API_BASE_URL } from "@/api/api";
+import { useAuthContext } from "@/components/AuthProvider";
+import { LocationCard } from "@/components/profile-page/LocationCard";
+import { PersonalInfoCard } from "@/components/profile-page/PersonalInfoCard";
+import { ProfileHeader } from "@/components/profile-page/ProfileHeader";
+import { ThemedText } from "@/components/ThemedText";
+import { Colors } from "@/constants/Colors";
+import { useThemeColor } from "@/hooks/useThemeColor";
+import { fetchUserProfile, useApi, UserProfile, zNewUserProfile, zUserProfile } from "@/services/services";
 import axios from "axios";
-import {Button} from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { useForm } from "react-hook-form";
+import { LoadingState } from "@/components/profile-page/LoadingState";
+import { ErrorView } from "@/components/ErrorView";
 
 type ColorScheme = "light" | "dark";
 
 export default function ProfileScreen() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+	const { logout, updateUser } = useAuthContext();
+	const api = useApi();
+	const { data: profile, error: qrProfileError, isLoading: qrProfileLoading, mutate: revalidateProfile } = api.getUserProfile();
+	const { trigger: doProfileUdpate, isMutating: mxProfileLoading, error: mxProfileError } = api.mxUpdateUserProfile();
+	const { control, handleSubmit } = useForm({
+		defaultValues: profile
+	});
 
-  const { token, user } = useAuthContext();
-  const router = useRouter();
-  const backgroundColor = useThemeColor({}, "background");
+	const isLoading = qrProfileLoading || mxProfileLoading;
+	const error = qrProfileError?.message || mxProfileError?.message;
 
-  const colorScheme = useThemeColor({}, "background") as ColorScheme;
-  const colors = Colors[colorScheme] || Colors.light;
+	const router = useRouter();
+	const backgroundColor = useThemeColor({}, "background");
 
-  const fetchProfile = useCallback(async (access_token: string) => {
-    console.log(`This is my token - ${access_token}`);
-    try {
-      setIsLoading(true);
-      setError(null);
+	const colorScheme = useThemeColor({}, "background");
+	const colors = Colors[colorScheme] || Colors.light;
 
-      const userData = await fetchUserProfile(access_token!);
-      setProfile(userData);
-    } catch (error) {
-      // console.error("Error fetching user profile:", error);
-      console.log(error);
-      if (axios.isAxiosError(error) && error.response) {
-        if (error.response.status === 401) {
-          setError("Your session has expired. Please log in again.");
-          setError(
-              `Failed to load user profile: ${
-                  error.response.data.message || "Unknown error"
-              }`
-          );
-        }
-      } else {
-        setError("An unexpected error occurred while fetching your profile.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  },[]);
+	const handleSaveChanges = async (profile: any) => {
+		try {
+			doProfileUdpate(zNewUserProfile.parse(profile))
+				.then(({ token, ...user }) => Promise.allSettled([updateUser({ user, token }), revalidateProfile()]))
+				.then(() => Alert.alert("Success", "Profile updated successfully"))
+				.catch((error) => Alert.alert(error.message));
+		} catch (error) {
+			console.error("Error updating profile:", error);
+			Alert.alert("Error", "Failed to update profile");
+		}
+	};
 
-  useEffect(() => {
-    fetchProfile(token!).catch(error => console.log(error));
-  }, [fetchProfile, token]);
+	if (error) {
+		return <ErrorView onRetry={() => void 0} error={JSON.stringify(error, null, 2)} />;
+	}
 
-  const handleSaveChanges = async () => {
-    setIsLoading(true);
-    try {
-      await axios.put(
-        `${API_BASE_URL}/update-profile`,
-        {
-          name: profile?.name,
-          email: profile?.email,
-          phone: profile?.phone,
-          area: profile?.area,
-          email_notifications: profile?.email_notifications,
-          push_notifications: profile?.push_notifications,
-        },
-        {
-          headers: { Authorization: `Bearer ${user.token}` },
-        }
-      );
-      Alert.alert("Success", "Profile updated successfully");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      Alert.alert("Error", "Failed to update profile");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+	if (!profile || isLoading) {
+		return <LoadingState />;
+	}
 
-
-  const logout = () => {
-    logoutUser(token!).then(res => router.replace('/login'));
-  }
-  
-  if (!profile) {
-    return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: colors.background }]}
-        edges={["top"]}
-      >
-        <ThemedText>Loading profile...</ThemedText>
-        <Button onPress={logout} title={"Logout"}/>
-      </SafeAreaView>
-    );
-  }
-
-  const logoutUser = async (access_token: string) => {
-    try {
-      // Call your API to invalidate the token if necessary
-      await axios.post(
-          `${API_BASE_URL}/logout`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${access_token}` },
-          }
-      );
-
-      // Clear the stored auth state
-      await AsyncStorage.removeItem("authState");
-      // setAuthState({ token: null, user: null });
-      return true;
-    } catch (error) {
-      console.error("Logout error:", error);
-      return false;
-    }
-  };
-
-
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor }]}>
-      <ScrollView style={styles.scrollView}>
-        <ProfileHeader profile={profile} />
-        <PersonalInfoCard profile={profile} setProfile={setProfile} />
-        <LocationCard profile={profile} />
-        <Button onPress={logout} title={"Logout"}/>
-      </ScrollView>
-    </SafeAreaView>
-  );
+	return (
+		<SafeAreaView style={[styles.container, { backgroundColor }]}>
+			<ScrollView style={styles.scrollView} className="flex flex-col gap-5 p-1">
+				<ProfileHeader profile={profile} />
+				<PersonalInfoCard control={control} setProfile={handleSaveChanges} />
+				<LocationCard control={control} />
+				<Button disabled onPress={handleSubmit(handleSaveChanges)} title={"update"} />
+				<Button onPress={() => logout().then((res) => router.replace("/login"))} title={"Logout"} />
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
+	container: {
+		flex: 1
+	},
+	scrollView: {
+		flex: 1
+	}
 });
