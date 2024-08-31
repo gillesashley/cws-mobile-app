@@ -89,6 +89,11 @@ export default function ProfileScreen() {
     }
   };
 
+
+  const logout = () => {
+    logoutUser(token!).then(res => router.replace('/login'));
+  }
+  
   if (!profile) {
     return (
       <SafeAreaView
@@ -96,6 +101,7 @@ export default function ProfileScreen() {
         edges={["top"]}
       >
         <ThemedText>Loading profile...</ThemedText>
+        <Button onPress={logout} title={"Logout"}/>
       </SafeAreaView>
     );
   }
@@ -121,9 +127,6 @@ export default function ProfileScreen() {
     }
   };
 
-  const logout = () => {
-    logoutUser(token!).then(res => router.replace('/login'));
-  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]}>
