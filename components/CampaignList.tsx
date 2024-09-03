@@ -7,7 +7,7 @@ import { Button } from './ui/Button';
 import { CampaignMessage } from '@/services/services';
 
 interface CampaignListProps {
-  campaignMessages: CampaignMessage[];
+  campaignMessages: CampaignMessage[]|undefined;
   onClose: () => void;
 }
 

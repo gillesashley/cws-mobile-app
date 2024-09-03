@@ -1,11 +1,12 @@
 {
   "expo": {
+    "jsEngine":"hermes",
     "name": "cws-mobile-app",
     "slug": "cws-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "cws-mobile-app",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -41,6 +42,7 @@
       ]
     ],
     "experiments": {
+      "tsconfigPaths": true,
       "typedRoutes": true
     },
     "extra": {
@@ -48,11 +50,12 @@
         "origin": false
       },
       "eas": {
-        "projectId": "834ba896-bd49-4804-8236-e40cd1f089f3"
+
       }
     },
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "owner": "teczaleel"
   }
 }

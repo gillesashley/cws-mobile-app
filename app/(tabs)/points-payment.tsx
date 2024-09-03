@@ -10,7 +10,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Button } from '@/components/ui/Button';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { buildApiUrl, fetchPointsData, PointsData, submitWithdrawalRequest, useAxios } from '@/services/services';
+import { buildApiUrl, fetchPointsData, PointsData, submitWithdrawalRequest, useApi } from '@/services/services';
 import useSWR, { mutate } from 'swr';
 import useSWRMutation from 'swr/dist/mutation';
 import { z } from 'zod';
@@ -44,7 +44,7 @@ const zPointWithdrawals = z.object({
 
 export default function PointsPaymentScreen() {
 	const auth = useAuthContext();
-	const axios = useAxios();
+	const axios = useApi();
 
 	const {
 		data: pointsData,
@@ -52,7 +52,7 @@ export default function PointsPaymentScreen() {
 		isValidating: refreshing,
 		mutate: onRefresh
 	} = useSWR({ url: buildApiUrl('/points'), auth }, ({ url }) =>
-		axios()
+		axios.axiosInstance
 			.get(url)
 			.then(d => zPointWithdrawals.parse(d.data))
 	);
@@ -62,7 +62,7 @@ export default function PointsPaymentScreen() {
 		isMutating: isSubmitting,
 		error: error
 	} = useSWRMutation({ url: buildApiUrl('/reward-withdrawals'), amount: 0 }, ({ url }, { arg }: { arg: { amount: number } }) => {
-		return axios()
+		return axios.axiosInstance
 			.post(url, arg)
 			.then(d => d.data);
 	});

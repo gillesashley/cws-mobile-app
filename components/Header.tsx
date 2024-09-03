@@ -4,7 +4,7 @@ import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "./ThemedText";
 
 interface HeaderProps {
-  balance: number | null;
+  balance: number | undefined;
   onBalancePress: () => void;
 }
 
@@ -20,7 +20,7 @@ export const Header: React.FC<HeaderProps> = ({ balance, onBalancePress }) => {
         onPress={onBalancePress}
       >
         <ThemedText style={styles.balanceText}>
-          Pts: {balance !== null ? balance.toFixed(2) : "---"}
+          Pts: { balance?.toFixed(2) ?? "---"}
         </ThemedText>
       </TouchableOpacity>
     </View>

@@ -12,6 +12,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useCustomFonts } from '@/hooks/useCustomFonts';
 import { StatusBar } from 'expo-status-bar';
 import { SWRConfig } from 'swr';
+// import '../global.css'
 
 SplashScreen.preventAutoHideAsync();
 

@@ -15,7 +15,10 @@ import { Header } from '@/components/Header';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { useThemeColor } from '@/hooks/useThemeColor';
-import { CampaignMessage, fetchCampaignMessages, fetchUserBalance } from '@/services/services';
+import { CampaignMessage, fetchCampaignMessages, fetchUserBalance, useApi } from '@/services/services';
+import useSWR from 'swr';
+import { AxiosError } from 'axios';
+import { LoadingState } from '@/components/profile-page/LoadingState';
 
 type RootStackParamList = {
 	PointsPayment: undefined;
@@ -24,7 +27,7 @@ type RootStackParamList = {
 interface CampaignSectionProps {
 	title: string;
 	description: string;
-	campaigns: CampaignMessage[];
+	campaigns: CampaignMessage[]|undefined;
 	onSeeAll: () => void;
 }
 
@@ -40,7 +43,7 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
 		<FlatList
 			horizontal
 			showsHorizontalScrollIndicator={false}
-			data={campaigns.slice(0, 3)}
+			data={campaigns?.slice(0, 3)}
 			renderItem={({ item }) => <CampaignPost {...item} />}
 			keyExtractor={(item) => item.id}
 			contentContainerStyle={styles.campaignScroll}
@@ -50,76 +53,44 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
 
 export default function HomeScreen() {
 	const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
-	const { balance, updateBalance } = useUserData();
-	const [campaignMessages, setCampaignMessages] = useState<CampaignMessage[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [userBalance, setUserBalance] = useState<number | null>(null);
+	
+
+	const {getCampaignsConstituency: getCampaigns,getUserBalance,getCampaignsNational,getCampaignsRegional} =useApi()
+	const {data:regionalCampaigns} = getCampaignsRegional()
+	const {data:nationalCampaigns}=getCampaignsNational()
+	const {data:contituencyCampaigns,isLoading:qryCampaignLoading,error:qryCampaignError,mutate:refreshCampaigns} = getCampaigns()
+	const {data:userBalance,isLoading:qryBalanceLoading,error:qryBalanceError,mutate:refreshBalance} = getUserBalance()
+
+	const isLoading = qryBalanceLoading??qryCampaignLoading
+	const error = (qryBalanceError??qryCampaignError) 
+	
+	console.log({ contituencyCampaigns,userBalance,isLoading,error})
+
 	const [showAllCampaigns, setShowAllCampaigns] = useState(false);
-	const [refreshing, setRefreshing] = useState(false);
 	const router = useRouter();
 
-	const { token } = useAuthContext();
 	const backgroundColor = useThemeColor({}, 'background');
 
-	const loadData = useCallback(
-		async (isRefreshing = false) => {
-			console.log('loadData called, isRefreshing:', isRefreshing);
-			if (!token) {
-				console.log('No token found, setting error');
-				setError('You must be logged in to view this content.');
-				setIsLoading(false);
-				setRefreshing(false);
-				return;
-			}
-			try {
-				console.log('Fetching campaign messages and user balance');
-				const [messages, balance] = await Promise.all([fetchCampaignMessages(token), fetchUserBalance(token)]);
-				console.log('Data fetched successfully');
-				setCampaignMessages(messages);
-				setUserBalance(balance);
-				updateBalance(balance);
-				setError(null);
-			} catch (err) {
-				console.error('Error fetching data:', err);
-				setError('Failed to load data. Please try again.');
-			} finally {
-				setIsLoading(false);
-				setRefreshing(false);
-			}
-		},
-		[token, updateBalance]
-	);
 
-	useEffect(() => {
-		console.log('HomeScreen mounted, calling loadData');
-		loadData();
-		return () => {
-			console.log('HomeScreen unmounting');
-		};
-	}, [loadData]);
+	const onRefresh = ()=> Promise.allSettled([refreshBalance(),refreshCampaigns()])
 
-	const onRefresh = useCallback(() => {
-		setRefreshing(true);
-		loadData(true);
-	}, [loadData]);
 
 	if (isLoading) {
 		return (
 			<SafeAreaView style={[styles.container, { backgroundColor }]}>
-				<ActivityIndicator size='large' color={useThemeColor({}, 'text')} />
+				<LoadingState />
 			</SafeAreaView>
 		);
 	}
 
 	if (error) {
-		return <ErrorView error={error} onRetry={() => loadData()} />;
+		return <ErrorView error={JSON.stringify(error.message,null,2)} onRetry={() => onRefresh()} />;
 	}
 
 	return (
 		<SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
-			<Header balance={userBalance} onBalancePress={() => router.push('/points-payment')} />
-			<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#9Bd35A', '#689F38']} />}>
+			<Header balance={userBalance?.balance} onBalancePress={() => router.push('/points-payment')} />
+			<ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={['#9Bd35A', '#689F38']} />}>
 				<View style={styles.bannerContainer}>
 					<View style={styles.banner}>
 						<ThemedText style={styles.bannerText}>Banners</ThemedText>
@@ -129,7 +100,7 @@ export default function HomeScreen() {
 				<CampaignSection
 					title='Constituency'
 					description='All campaigns in your constituency'
-					campaigns={campaignMessages}
+					campaigns={contituencyCampaigns??[]}
 					onSeeAll={() => setShowAllCampaigns(true)}
 				/>
 
@@ -139,17 +110,17 @@ export default function HomeScreen() {
 					</View>
 				</View>
 
-				<CampaignSection title='Region' description='All campaigns across the region' campaigns={campaignMessages} onSeeAll={() => setShowAllCampaigns(true)} />
+				<CampaignSection title='Region' description='All campaigns across the region' campaigns={regionalCampaigns??[]} onSeeAll={() => setShowAllCampaigns(true)} />
 
 				<CampaignSection
 					title='National'
 					description='All campaigns across the country'
-					campaigns={campaignMessages}
+					campaigns={nationalCampaigns??[]}
 					onSeeAll={() => setShowAllCampaigns(true)}
 				/>
 			</ScrollView>
 			<Modal visible={showAllCampaigns} animationType='slide' onRequestClose={() => setShowAllCampaigns(false)}>
-				<CampaignList campaignMessages={campaignMessages} onClose={() => setShowAllCampaigns(false)} />
+				<CampaignList campaignMessages={contituencyCampaigns} onClose={() => setShowAllCampaigns(false)} />
 			</Modal>
 		</SafeAreaView>
 	);

@@ -47,6 +47,7 @@ export function CampaignPostContent({
 const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
+    color: '#000000'
   },
   title: {
     fontSize: 18,

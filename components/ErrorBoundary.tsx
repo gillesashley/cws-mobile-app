@@ -1,4 +1,3 @@
-import * as ErrorRecovery from "expo-error-recovery";
 import * as Updates from "expo-updates";
 import React, { useEffect, useState } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
@@ -10,9 +9,6 @@ interface ErrorBoundaryProps {
 export function ExpoErrorBoundary({ children }: ErrorBoundaryProps) {
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    ErrorRecovery.setRecoveryProps({ error: null });
-  }, []);
 
   const handleError = (error: Error) => {
     console.error("Caught error:", error);
@@ -21,7 +17,6 @@ export function ExpoErrorBoundary({ children }: ErrorBoundaryProps) {
 
   const resetError = async () => {
     setError(null);
-    ErrorRecovery.setRecoveryProps({ error: null });
     try {
       const update = await Updates.checkForUpdateAsync();
       if (update.isAvailable) {
