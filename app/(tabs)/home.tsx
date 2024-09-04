@@ -1,24 +1,18 @@
-import { useUserData } from '@/components/UserDataContext';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useRouter } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Modal, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { FlatList, Image, Modal, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 
-import { useAuthContext } from '@/components/AuthProvider';
 import { CampaignList } from '@/components/CampaignList';
 import { CampaignPost } from '@/components/CampaignPost';
 import { ErrorView } from '@/components/ErrorView';
 import { Header } from '@/components/Header';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { useThemeColor } from '@/hooks/useThemeColor';
-import { CampaignMessage, fetchCampaignMessages, fetchUserBalance, useApi } from '@/services/services';
-import useSWR from 'swr';
-import { AxiosError } from 'axios';
 import { LoadingState } from '@/components/profile-page/LoadingState';
+import { ThemedText } from '@/components/ThemedText';
+import { useThemeColor } from '@/hooks/useThemeColor';
+import { CampaignMessage, useApi } from '@/services/services';
 
 type RootStackParamList = {
 	PointsPayment: undefined;
@@ -92,9 +86,11 @@ export default function HomeScreen() {
 			<Header balance={userBalance?.balance} onBalancePress={() => router.push('/points-payment')} />
 			<ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={['#9Bd35A', '#689F38']} />}>
 				<View style={styles.bannerContainer}>
-					<View style={styles.banner}>
-						<ThemedText style={styles.bannerText}>Banners</ThemedText>
-					</View>
+					<Image
+					source={require('../assets/images/mtn_banner.png')}
+					style={styles.banner}
+					resizeMode="cover"
+					/>
 				</View>
 
 				<CampaignSection
@@ -105,9 +101,11 @@ export default function HomeScreen() {
 				/>
 
 				<View style={styles.bannerContainer}>
-					<View style={styles.extraBanner}>
-						<ThemedText style={styles.extraBannerText}>Extra Banners & Advertisements</ThemedText>
-					</View>
+					<Image
+						source={require('../assets/images/guiness_banner.png')}
+						style={styles.extraBanner}
+						resizeMode="cover"
+					/>
 				</View>
 
 				<CampaignSection title='Region' description='All campaigns across the region' campaigns={regionalCampaigns??[]} onSeeAll={() => setShowAllCampaigns(true)} />
@@ -136,23 +134,15 @@ const styles = StyleSheet.create({
 	},
 	banner: {
 		height: 150,
-		backgroundColor: '#f0f0f0',
-		justifyContent: 'center',
-		alignItems: 'center',
+		width: '100%',
 		borderRadius: 10,
-	},
-	extraBanner: {
+	  },
+	  extraBanner: {
 		height: 100,
-		backgroundColor: '#f0f0f0',
-		justifyContent: 'center',
-		alignItems: 'center',
+		width: '100%',
 		marginVertical: 20,
 		borderRadius: 10,
-	},
-	bannerText: {
-		fontSize: 24,
-		color: '#888',
-	},
+	  },
 	sectionContainer: {
 		marginBottom: 20,
 	},
@@ -177,9 +167,5 @@ const styles = StyleSheet.create({
 	},
 	campaignScroll: {
 		paddingLeft: 16,
-	},
-	extraBannerText: {
-		fontSize: 16,
-		color: '#888',
 	},
 });
