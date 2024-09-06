@@ -44,10 +44,10 @@ export const zUserProfile = z.object({
 	constituency: z.optional(zConstituency),
 	area: z.string(),
 	region: z.optional(zRegion),
-	region_id: z.optional(z.string()),
-	constituency_id: z.optional(z.string()),
-	email_notifications: z.boolean(),
-	push_notifications: z.boolean(),
+	region_id: z.optional(z.string().or(z.number())),
+	constituency_id: z.optional(z.string().or(z.number())),
+	email_notifications: z.optional(z.boolean()),
+	push_notifications: z.optional(z.boolean()),
 })
 
 export const zNewUserProfile = zUserProfile.omit({region:true,constituency:true})
@@ -288,7 +288,7 @@ export const useApi = () => {
 
 	
 	return {axiosInstance,
-		getRegions: (options?:SWROptions)=>useSWR<Region[],AxiosError>('/regions',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
+		getRegions: (options?:SWROptions)=>useSWR<Region[],AxiosError>('/regions?include=contituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
 		getConstituencies: (options?:SWROptions)=>useSWR<Constituency[],AxiosError>('/constituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
 		getCampaignsConstituency: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data),options),
 		getCampaignsRegional: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data),options),
@@ -297,7 +297,7 @@ export const useApi = () => {
 		getWithdrawals: (options?:SWROptions)=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data),options),
 		getPoints: (options?:SWROptions)=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data),options),
 		getUserProfile: (options?:SWROptions)=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
-		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/update-user',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.put(url,args) as any,options) 
+		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/user-profile',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.put(url,arg) as any,options) 
 	};
 	
 };

@@ -73,7 +73,7 @@ export default function ProfileScreen() {
           <PersonalInfoCard control={control} />
           <LocationCard control={control} />
           <View className="flex flex-col gap-3 w-full p-4">
-            <Button disabled onPress={handleSubmit(handleSaveChanges)} title={"update"} />
+            <Button  onPress={handleSubmit(handleSaveChanges)} title={"update"} />
             <Button onPress={() => reset()} title={"clear"} />
             <Button onPress={() => logout().then(res => router.replace("/login"))} title={"Logout"} />
           </View>
