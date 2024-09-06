@@ -13,6 +13,8 @@ import { LoadingState } from '@/components/profile-page/LoadingState';
 import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { CampaignMessage, useApi } from '@/services/services';
+import mtnBanner from '@/assets/images/mtn_banner.png'
+import guinessBanner from '@/assets/images/guinness_banner.png'
 
 type RootStackParamList = {
 	PointsPayment: undefined;
@@ -46,7 +48,6 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
 );
 
 export default function HomeScreen() {
-	const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 	
 
 	const {getCampaignsConstituency: getCampaigns,getUserBalance,getCampaignsNational,getCampaignsRegional} =useApi()
@@ -58,7 +59,6 @@ export default function HomeScreen() {
 	const isLoading = qryBalanceLoading??qryCampaignLoading
 	const error = (qryBalanceError??qryCampaignError) 
 	
-	console.log({ contituencyCampaigns,userBalance,isLoading,error})
 
 	const [showAllCampaigns, setShowAllCampaigns] = useState(false);
 	const router = useRouter();
@@ -87,7 +87,7 @@ export default function HomeScreen() {
 			<ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={['#9Bd35A', '#689F38']} />}>
 				<View style={styles.bannerContainer}>
 					<Image
-					source={require('../assets/images/mtn_banner.png')}
+					source={mtnBanner}
 					style={styles.banner}
 					resizeMode="cover"
 					/>
@@ -102,7 +102,7 @@ export default function HomeScreen() {
 
 				<View style={styles.bannerContainer}>
 					<Image
-						source={require('../assets/images/guiness_banner.png')}
+						source={guinessBanner}
 						style={styles.extraBanner}
 						resizeMode="cover"
 					/>

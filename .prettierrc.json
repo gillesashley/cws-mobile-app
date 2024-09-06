@@ -2,13 +2,13 @@
   "parser": "babel",
   "printWidth": 140,
   "tabWidth": 2,
-  "useTabs": true,
+  "useTabs": false,
   "semi": true,
   "singleQuote": false,
   "trailingComma": "none",
   "bracketSpacing": true,
   "jsxBracketSameLine": false,
-  "arrowParens": "always",
+  "arrowParens": "avoid",
   "rangeStart": 0,
   "rangeEnd": null
 }
