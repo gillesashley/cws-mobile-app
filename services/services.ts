@@ -288,14 +288,14 @@ export const useApi = () => {
 
 	
 	return {axiosInstance,
-		getCampaignsConstituency: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data)),
-		getCampaignsRegional: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data)),
-		getCampaignsNational: ()=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data)),
-		getUserBalance: ()=>useSWR<{balance:number},AxiosError>('/user-balance',(key)=> axiosInstance.get(key).then(r=>r.data)),
-		getWithdrawals: ()=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data)),
-		getPoints: ()=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data)),
-		getUserProfile: ()=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data)),
-		mxUpdateUserProfile:()=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/update-user',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axios.put(url,args) as any) 
+		getCampaignsConstituency: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data),options),
+		getCampaignsRegional: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data),options),
+		getCampaignsNational: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data),options),
+		getUserBalance: (options?:SWROptions)=>useSWR<{balance:number},AxiosError>('/user-balance',(key)=> axiosInstance.get(key).then(r=>r.data),options),
+		getWithdrawals: (options?:SWROptions)=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data),options),
+		getPoints: (options?:SWROptions)=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data),options),
+		getUserProfile: (options?:SWROptions)=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/update-user',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.put(url,args) as any,options) 
 	};
 	
 };
