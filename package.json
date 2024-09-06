@@ -11,7 +11,7 @@
     "web": "expo start --web -c",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "build:a": "expo build --android",
+    "build:android": "expo build --android",
     "postinstall": "patch-package"
   },
   "jest": {
