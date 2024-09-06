@@ -288,6 +288,8 @@ export const useApi = () => {
 
 	
 	return {axiosInstance,
+		getRegions: (options?:SWROptions)=>useSWR<Region[],AxiosError>('/regions',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
+		getConstituencies: (options?:SWROptions)=>useSWR<Constituency[],AxiosError>('/constituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
 		getCampaignsConstituency: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data),options),
 		getCampaignsRegional: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data),options),
 		getCampaignsNational: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data),options),

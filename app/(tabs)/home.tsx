@@ -48,7 +48,6 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
 );
 
 export default function HomeScreen() {
-	const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 	
 
 	const {getCampaignsConstituency: getCampaigns,getUserBalance,getCampaignsNational,getCampaignsRegional} =useApi()
@@ -60,7 +59,6 @@ export default function HomeScreen() {
 	const isLoading = qryBalanceLoading??qryCampaignLoading
 	const error = (qryBalanceError??qryCampaignError) 
 	
-	console.log({ contituencyCampaigns,userBalance,isLoading,error})
 
 	const [showAllCampaigns, setShowAllCampaigns] = useState(false);
 	const router = useRouter();
