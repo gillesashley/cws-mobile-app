@@ -1,6 +1,6 @@
 {
   "expo": {
-    "jsEngine":"hermes",
+    "jsEngine": "hermes",
     "name": "cws-mobile-app",
     "slug": "cws-mobile-app",
     "version": "1.0.0",
@@ -50,7 +50,7 @@
         "origin": false
       },
       "eas": {
-
+        "projectId": "4cf5104b-aa77-403c-9301-51e2bf6a19a0"
       }
     },
     "assetBundlePatterns": [
