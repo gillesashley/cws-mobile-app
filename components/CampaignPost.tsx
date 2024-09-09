@@ -47,7 +47,7 @@ export function CampaignPost(props: CampaignPostProps) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor }]} className='nfc-campaign-post-item xs:w-1/2 lg:w-1/4'>
       <CampaignPostImage imageUrl={props.image_url} style={styles.image} />
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.8)"]}

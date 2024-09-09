@@ -35,6 +35,7 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
             renderItem={({ item }) => <CampaignPost {...item} />}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.campaignScroll}
+            className="nfc-campaignSection:flatlist"
         />
     </View>
 );
@@ -73,7 +74,7 @@ export default function HomeScreen() {
             <Header balance={userBalance?.balance} onBalancePress={() => router.push("/points-payment")} />
             <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={["#9Bd35A", "#689F38"]} />}>
                 <View style={styles.bannerContainer}>
-                    <Image source={require("./../../assets/images/mtn_banner.png")} style={styles.banner} resizeMode="cover" />
+                    <Image source={require("@/assets/images/mtn_banner.png")} style={styles.banner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
@@ -84,7 +85,7 @@ export default function HomeScreen() {
                 />
 
                 <View style={styles.bannerContainer}>
-                    <Image source={require("./../../assets/images/guinness_banner.png")} style={styles.extraBanner} resizeMode="cover" />
+                    <Image source={require("@/assets/images/guinness_banner.png")} style={styles.extraBanner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: "bold"
+        fontWeight: "bold",
     },
     seeAllText: {
         color: "blue"
