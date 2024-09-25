@@ -76,6 +76,10 @@ export interface PointsData {
 	}>;
 }
 
+export interface Banner {
+	id,image_url,title,description
+}
+
 export interface WithdrawalRequest {
 	amount: number;
 }
@@ -288,16 +292,19 @@ export const useApi = () => {
 
 	
 	return {axiosInstance,
-		getRegions: (options?:SWROptions)=>useSWR<Region[],AxiosError>('/regions?include=contituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
+		getRegions: (options?:SWROptions)=>useSWR<Region[],AxiosError>('/regions?include=constituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
 		getConstituencies: (options?:SWROptions)=>useSWR<Constituency[],AxiosError>('/constituencies',(key)=> axiosInstance.get(key).then(r=>r.data.data),options),
-		getCampaignsConstituency: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data),options),
-		getCampaignsRegional: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[regional]').then(r=>r.data.data),options),
-		getCampaignsNational: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&filter[national]').then(r=>r.data.data),options),
+		getCampaignsConstituency: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages',()=> axiosInstance.get('/campaign-messages?sort=-created_at&include=user_liked&filter[constituency_id]='+auth.user.constituency_id).then(r=>r.data.data),options),
+		getCampaignsRegional: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/regional',()=> axiosInstance.get('/campaign-messages?sort=-created_at&include=user_liked&filter[regional]').then(r=>r.data.data),options),
+		getCampaignsNational: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&include=user_liked&filter[national]').then(r=>r.data.data),options),
 		getUserBalance: (options?:SWROptions)=>useSWR<{balance:number},AxiosError>('/user-balance',(key)=> axiosInstance.get(key).then(r=>r.data),options),
 		getWithdrawals: (options?:SWROptions)=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data),options),
 		getPoints: (options?:SWROptions)=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data),options),
 		getUserProfile: (options?:SWROptions)=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
-		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/user-profile',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.put(url,arg) as any,options) 
+		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/user-profile',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.patch(url,arg) as any,options) ,
+		getConstituencyBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=${auth.user.constituency_id}&filter[bannerable_type]=\\App\\Models\\Constituency`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		getRegionBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=${auth.user.region_id}&filter[bannerable_type]=\\App\\Models\\Region`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		getNationalBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=&filter[bannerable_type]=`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
 	};
 	
 };
