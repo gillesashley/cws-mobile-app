@@ -30,25 +30,25 @@ export default function LikeButton({
     "text"
   );
 
-  useEffect(() => {
-    if (token) {
-      fetchLikeStatus();
-    }
-  }, [token]);
+  // useEffect(() => {
+  //   if (token) {
+  //     fetchLikeStatus();
+  //   }
+  // }, [token]);
 
-  const fetchLikeStatus = async () => {
-    try {
-      const response = await axios.get(
-        `${API_BASE_URL}/campaign-messages/${postId}/like-status`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setIsLiked(response.data.is_liked);
-    } catch (error) {
-      console.error("Error fetching like status:", error);
-    }
-  };
+  // const fetchLikeStatus = async () => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_BASE_URL}/campaign-messages/${postId}/like-status`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       }
+  //     );
+  //     setIsLiked(response.data.is_liked);
+  //   } catch (error) {
+  //     console.error("Error fetching like status:", error);
+  //   }
+  // };
 
   const handleLike = useCallback(
     debounce(async () => {

@@ -1,5 +1,5 @@
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList, Image, Modal, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -11,6 +11,9 @@ import { LoadingState } from "@/components/profile-page/LoadingState";
 import { ThemedText } from "@/components/ThemedText";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { CampaignMessage, useApi } from "@/services/services";
+import mtn_banner from "@/assets/images/mtn_banner.jpeg";
+import guinness_banner from "@/assets/images/guinness_banner.jpeg";
+import useSWR, { useSWRConfig } from "swr";
 
 interface CampaignSectionProps {
     title: string;
@@ -33,7 +36,7 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
             showsHorizontalScrollIndicator={false}
             data={campaigns?.slice(0, 3)}
             renderItem={({ item }) => <CampaignPost {...item} />}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={styles.campaignScroll}
             className="nfc-campaignSection:flatlist"
         />
@@ -41,13 +44,18 @@ const CampaignSection: React.FC<CampaignSectionProps> = ({ title, description, c
 );
 
 export default function HomeScreen() {
-    const { getCampaignsConstituency: getCampaigns, getUserBalance, getCampaignsNational, getCampaignsRegional } = useApi();
-    const { data: regionalCampaigns } = getCampaignsRegional();
-    const { data: nationalCampaigns } = getCampaignsNational();
-    const { data: contituencyCampaigns, isLoading: qryCampaignLoading, error: qryCampaignError, mutate: refreshCampaigns } = getCampaigns();
-    const { data: userBalance, isLoading: qryBalanceLoading, error: qryBalanceError, mutate: refreshBalance } = getUserBalance();
+    const api = useApi();
+    const { data: ctyBanners, isLoading: qryBannersLoading } = api.getConstituencyBanners();
+    const { data: rgBanners, isLoading: qryRgBannersLoading } = api.getRegionBanners();
+    const { data: ntBanners, isLoading: qryNtBannersLoading } = api.getNationalBanners();
+    const { data: regionalCampaigns, isLoading: qryRegionalCampaignsLoading } = api.getCampaignsRegional();
+    const { data: nationalCampaigns, isLoading: qryNationalCampaignsLoading } = api.getCampaignsNational();
+    const { data: constituencyCampaigns, isLoading: qryCampaignLoading, error: qryCampaignError, mutate: refreshCampaigns } = api.getCampaignsConstituency();
+    const { data: userBalance, isLoading: qryBalanceLoading, error: qryBalanceError, mutate: refreshBalance } = api.getUserBalance();
+    const [bannerIdx, setBannerIdx] = useState<undefined|number>();
+    const {mutate}= useSWRConfig()
 
-    const isLoading = qryBalanceLoading ?? qryCampaignLoading;
+    const isLoading = qryBalanceLoading || qryCampaignLoading || qryNationalCampaignsLoading || qryRegionalCampaignsLoading||qryBannersLoading||qryRgBannersLoading||qryNtBannersLoading;
     const error = qryBalanceError ?? qryCampaignError;
 
     const [showAllCampaigns, setShowAllCampaigns] = useState(false);
@@ -55,7 +63,15 @@ export default function HomeScreen() {
 
     const backgroundColor = useThemeColor({}, "background");
 
-    const onRefresh = () => Promise.allSettled([refreshBalance(), refreshCampaigns()]);
+    const onRefresh = () => Promise.allSettled([refreshBalance(), refreshCampaigns(),mutate(()=>true)]);
+
+    useEffect(() => {
+        if (!ctyBanners?.length) {
+            return;
+        }
+
+        setInterval(() => setBannerIdx((prevIdx) => ((prevIdx ?? 0) + 1)%ctyBanners.length),1_000*2);
+    }, []);
 
     if (isLoading) {
         return (
@@ -65,27 +81,23 @@ export default function HomeScreen() {
         );
     }
 
-    if (error) {
-        return <ErrorView error={JSON.stringify(error.message, null, 2)} onRetry={() => onRefresh()} />;
-    }
-
     return (
         <SafeAreaView style={[styles.container, { backgroundColor }]} edges={["top"]}>
             <Header balance={userBalance?.balance} onBalancePress={() => router.push("/points-payment")} />
             <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={["#9Bd35A", "#689F38"]} />}>
                 <View style={styles.bannerContainer}>
-                    <Image source={require("@/assets/images/mtn_banner.png")} style={styles.banner} resizeMode="cover" />
+                    <Image source={ctyBanners?.at(bannerIdx).image_url??mtn_banner} style={styles.banner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
                     title="Constituency"
                     description="All campaigns in your constituency"
-                    campaigns={contituencyCampaigns ?? []}
+                    campaigns={constituencyCampaigns ?? []}
                     onSeeAll={() => setShowAllCampaigns(true)}
                 />
 
                 <View style={styles.bannerContainer}>
-                    <Image source={require("@/assets/images/guinness_banner.png")} style={styles.extraBanner} resizeMode="cover" />
+                    <Image source={guinness_banner} style={styles.extraBanner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
@@ -103,8 +115,9 @@ export default function HomeScreen() {
                 />
             </ScrollView>
             <Modal visible={showAllCampaigns} animationType="slide" onRequestClose={() => setShowAllCampaigns(false)}>
-                <CampaignList campaignMessages={contituencyCampaigns} onClose={() => setShowAllCampaigns(false)} />
+                <CampaignList campaignMessages={constituencyCampaigns} onClose={() => setShowAllCampaigns(false)} />
             </Modal>
+            <ErrorView error={JSON.stringify(error?.message ?? error, null, 2)} onRetry={() => onRefresh()} />
         </SafeAreaView>
     );
 }
@@ -139,7 +152,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: "bold",
+        fontWeight: "bold"
     },
     seeAllText: {
         color: "blue"

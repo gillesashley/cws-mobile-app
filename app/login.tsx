@@ -24,7 +24,7 @@ const { height } = Dimensions.get('window');
 export default function Login() {
 	const { control, handleSubmit } = useForm({
 		defaultValues: {
-			email: 'champlin.eda@example.com' as any as string,
+			email: 'user1_11@example.com' as any as string,
 			password: 'password' as any as string,
 		},
 	});

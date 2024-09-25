@@ -5,6 +5,7 @@ import { StatisticCard } from "@/components/analytics/StatisticsCard";
 import { UserActivityBreakdown } from "@/components/analytics/UserActivityBreakdown";
 import { useAuthContext } from "@/components/AuthProvider";
 import { ExpoErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorView } from "@/components/ErrorView";
 import { LoadingState } from "@/components/profile-page/LoadingState";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -102,14 +103,6 @@ function AnalyticsScreen() {
     );
   }
 
-  if (error) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]}>
-        <ThemedText>{error}</ThemedText>
-      </SafeAreaView>
-    );
-  }
-
   if (!analyticsData) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor }]}>
@@ -191,7 +184,9 @@ function AnalyticsScreen() {
             }}
           />
         </ThemedView>
+        <ErrorView error={JSON.stringify(error?.message??error, null, 2)} />
       </ScrollView>
+      
     </SafeAreaView>
   );
 }

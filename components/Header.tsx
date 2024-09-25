@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = ({ balance, onBalancePress }) => {
     return (
         <View style={styles.header}>
             <View>
-                <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+                <Image source={require("@/assets/images/logo.png")} resizeMode="contain" style={styles.logo} />
             </View>
             <ThemedText style={styles.headerTitle}>CWS</ThemedText>
             <TouchableOpacity style={[styles.balanceContainer, { backgroundColor }]} onPress={onBalancePress}>

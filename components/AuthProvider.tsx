@@ -104,6 +104,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	const login = async (email: string, password: string): Promise<boolean> => {
 		try {
+			return axios.post(`${API_BASE_URL}/login`, {
+				email,
+				password
+			}).then(r=>r.data)
+			.then(({access_token:token,user})=>saveAuthState({ token, user }));
+
+
 			const response = await axios.post(`${API_BASE_URL}/login`, {
 				email,
 				password

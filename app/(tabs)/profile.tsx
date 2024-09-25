@@ -57,9 +57,9 @@ export default function ProfileScreen() {
     }
   };
 
-  if (error) {
-    return <ErrorView onRetry={() => void 0} error={JSON.stringify(error, null, 2)} />;
-  }
+  // if (error) {
+  //   return <ErrorView onRetry={() => void 0} error={JSON.stringify(error, null, 2)} />;
+  // }
 
   if (!profile || isLoading) {
     return <LoadingState />;
@@ -78,6 +78,7 @@ export default function ProfileScreen() {
             <Button onPress={() => logout().then(res => router.replace("/login"))} title={"Logout"} />
           </View>
         </View>
+        <ErrorView onRetry={() => void 0} error={JSON.stringify(error, null, 2)} />
       </ScrollView>
     </SafeAreaView>
   );

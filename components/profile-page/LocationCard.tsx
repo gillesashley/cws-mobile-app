@@ -41,7 +41,7 @@ export const LocationCard: React.FC<LocationCardProps> = ({ control }) => {
         )}
       />
 
-      <Text>Contituency</Text>
+      <Text>Constituency</Text>
       <Controller
         control={control}
         name="constituency_id"
