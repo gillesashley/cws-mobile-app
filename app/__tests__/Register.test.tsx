@@ -2,7 +2,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import axios from "axios";
 import React from "react";
-import Register from "../register"; // Adjust the path if necessary
+import Register from "../(public)/register"; // Adjust the path if necessary
 
 // Mock the axios module
 jest.mock("axios");

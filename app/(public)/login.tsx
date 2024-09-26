@@ -29,7 +29,7 @@ export default function Login() {
 		},
 	});
 type Creds = Parameters<Parameters<typeof handleSubmit>[0]>[0]
-	const { login } = useAuthContext();
+	const { login, } = useAuthContext();
 	const {
 		trigger: mxLogin,
 		isMutating: isLoading,

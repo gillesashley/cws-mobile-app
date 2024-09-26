@@ -15,7 +15,8 @@
     "build:android:preview": "eas build -p android -e preview --local",
     "build:android:remote": "stage=\" \" npm run build:android",
     "postinstall": "patch-package",
-    "doctor": "yes | time npx expo install --check && npx expo-doctor"
+    "doctor": "yes | time npx expo install --check && npx expo-doctor",
+    "log:adb": "adb logcat"
   },
   "jest": {
     "preset": "jest-expo"
@@ -49,6 +50,8 @@
     "patch-package": "^8.0.0",
     "postcss-loader": "^4.2.0",
     "postinstall-postinstall": "^2.1.0",
+    "prettier": "^3.3.3",
+    "prettier-eslint": "^16.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.53.0",

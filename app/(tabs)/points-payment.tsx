@@ -15,61 +15,24 @@ import useSWR, { mutate } from 'swr';
 import useSWRMutation from 'swr/dist/mutation';
 import { z } from 'zod';
 
-const zPointWithdrawals = z.object({
-	balance: z.number(),
-	withdrawalHistory: z
-		.object({
-			id: z
-				.string()
-				.or(z.number())
-				.transform(d => d + ''),
-			amount: z
-				.number()
-				.or(z.string())
-				.transform(d => Number(d ?? 0)),
-			status: z.string(),
-			created_at: z
-				.date()
-				.or(z.string())
-				.transform(d => new Date(d).toISOString()),
-			update_at: z.optional(
-				z
-					.date()
-					.or(z.string())
-					.transform(d => new Date(d).toISOString())
-			)
-		})
-		.array()
-});
+
 
 export default function PointsPaymentScreen() {
 	const auth = useAuthContext();
-	const axios = useApi();
+	const api = useApi();
 
-	const {
-		data: pointsData,
-		isLoading,
-		isValidating: refreshing,
-		mutate: onRefresh
-	} = useSWR({ url: buildApiUrl('/points'), auth }, ({ url }) =>
-		axios.axiosInstance
-			.get(url)
-			.then(d => zPointWithdrawals.parse(d.data))
-	);
+	const {data: pointsData,isLoading,isValidating: refreshing,mutate: onRefresh,error:qryErrPoints} = api.getPoints();
 
 	const {
 		trigger,
 		isMutating: isSubmitting,
-		error: error
-	} = useSWRMutation({ url: buildApiUrl('/reward-withdrawals'), amount: 0 }, ({ url }, { arg }: { arg: { amount: number } }) => {
-		return axios.axiosInstance
-			.post(url, arg)
-			.then(d => d.data);
-	});
+		error: mxErrWithdrawal
+	} = api.mxWithdrawals();
 
 	const [showWithdrawalForm, setShowWithdrawalForm] = useState(false);
 
 	const { token } = auth;
+	const error = mxErrWithdrawal||qryErrPoints
 	const backgroundColor = useThemeColor({}, 'background');
 
 	const handleWithdrawalRequest = async (amount: number) => {
@@ -119,7 +82,7 @@ export default function PointsPaymentScreen() {
 		);
 	}
 
-	if (error && error.includes('Points feature is not available')) {
+	if (error ) {
 		return (
 			<SafeAreaView style={[styles.container, { backgroundColor }]}>
 				<ThemedView style={styles.content}>
