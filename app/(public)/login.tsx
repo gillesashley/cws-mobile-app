@@ -19,6 +19,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { useForm, Controller } from 'react-hook-form';
 import useSWRMutation from 'swr/dist/mutation';
+import { AxiosError } from 'axios';
 const { height } = Dimensions.get('window');
 
 export default function Login() {
@@ -50,7 +51,7 @@ type Creds = Parameters<Parameters<typeof handleSubmit>[0]>[0]
 		}
 
     mxLogin(creds).then(()=>router.replace('/home'))
-    .catch(()=>Alert.alert('Error', 'Login failed. Please check your credentials and try again.'))
+    .catch((err:AxiosError)=>[Alert.alert('Error', err?.message??'Login failed. Please check your credentials and try again.'),console.log({err})])
 
 	};
 

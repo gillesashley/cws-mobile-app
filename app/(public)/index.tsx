@@ -6,10 +6,6 @@ import { useEffect } from "react";
 export default function Index() {
     const { isAuthenticated, stateEnum } = useAuthContext();
 
-    if (stateEnum === AuthStateEnum.UN_INITIALIZED) {
-        return <LoadingState />;
-    }
-
     if (isAuthenticated) {
         return <Redirect href="/(tabs)/home" />;
     } else {
