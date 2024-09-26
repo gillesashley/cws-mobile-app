@@ -5,7 +5,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
-import { AuthProvider } from "@/components/AuthProvider";
+import { AuthProvider, WhenAuthed, WhenNotAuthed } from "@/components/AuthProvider";
 import { ExpoErrorBoundary } from "@/components/ErrorBoundary";
 import { UserDataProvider } from "@/components/UserDataContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -39,18 +39,17 @@ export default function RootLayout() {
                         <SafeAreaProvider>
                             <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
                                 <SafeAreaView style={{ flex: 1 }} edges={["right", "bottom", "left"]}>
-                                    <StatusBar
-                                        style={colorScheme === "dark" ? "light" : "dark"}
-                                        backgroundColor="transparent"
-                                        translucent
-                                    />
+                                    <StatusBar style={colorScheme === "dark" ? "light" : "dark"} backgroundColor="transparent" translucent />
                                     <Stack>
-                                        <Stack.Screen name="index" options={{ headerShown: false }} />
                                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+                                        <Stack.Screen name="(public)" options={{ headerShown: false }} />
+                                        {/* <Stack.Screen name="index" options={{ headerShown: false }} />
                                         <Stack.Screen name="landing" options={{ headerShown: false }} />
                                         <Stack.Screen name="login" options={{ title: "Login" }} />
-                                        <Stack.Screen name="register" options={{ title: "Register" }} />
+                                        <Stack.Screen name="register" options={{ title: "Register" }} /> */}
                                         <Stack.Screen name="full-post" options={{ headerShown: false }} />
+
                                         <Stack.Screen name="+not-found" />
                                     </Stack>
                                 </SafeAreaView>
