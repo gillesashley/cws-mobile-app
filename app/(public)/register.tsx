@@ -187,10 +187,10 @@ export default function Register() {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={styles.keyboardAvoidingView}
             >
-                {/*<ScrollView*/}
-                {/*    contentContainerStyle={styles.scrollViewContent}*/}
-                {/*    keyboardShouldPersistTaps="handled"*/}
-                {/*>*/}
+                <ScrollView
+                   contentContainerStyle={styles.scrollViewContent}
+                   keyboardShouldPersistTaps="handled"
+                 >
                 <View style={styles.content}>
                     <Image
                         source={require("@/assets/images/logo.png")}
@@ -230,7 +230,7 @@ export default function Register() {
                         )}
                     </View>
                 </View>
-                {/*</ScrollView>*/}
+                </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
