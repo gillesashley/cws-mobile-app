@@ -15,7 +15,8 @@
     "build:android:preview": "eas build -p android -e preview --local",
     "build:android:remote": "stage=\" \" npm run build:android",
     "postinstall": "patch-package",
-    "doctor": "yes | time npx expo install --check && npx expo-doctor"
+    "doctor": "yes | time npx expo install --check && npx expo-doctor",
+    "log:adb": "adb logcat"
   },
   "jest": {
     "preset": "jest-expo"
