@@ -86,7 +86,7 @@ export default function HomeScreen() {
             <Header balance={userBalance?.balance} onBalancePress={() => router.push("/points-payment")} />
             <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={["#9Bd35A", "#689F38"]} />}>
                 <View style={styles.bannerContainer}>
-                    <Image source={ctyBanners?.at(bannerIdx).image_url??mtn_banner} style={styles.banner} resizeMode="cover" />
+                    <Image source={(ctyBanners?.length &&ctyBanners?.at(bannerIdx).image_url)||mtn_banner} style={styles.banner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection

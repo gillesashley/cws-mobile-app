@@ -18,7 +18,8 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
     const [active, setActive] = useState(false);
 
     useEffect(() => {
-        !active && setActive(true);
+
+        !active&& !!error && setActive(true);
     }, [error]);
 
     const dismiss = () => setActive(false);
@@ -29,9 +30,12 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
         }
     };
 
+    console.log({error})
+
     return (
         <Modal visible={active} animationType="none" onRequestClose={dismiss}>
             <View style={styles.container} className="flex flex-col gap-10">
+              {/* <ThemedText>authenticated:{auth.isAuthenticated?'true':'false'}</ThemedText> */}
                 <ThemedText style={styles.errorText}>{error}</ThemedText>
                 <ThemedText style={styles.errorText}>{auth.error?.message}</ThemedText>
                 {!!onRetry && <Button title="Try Again" onPress={doTryAgain} style={styles.button} />}
