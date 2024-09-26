@@ -15,13 +15,8 @@ export enum AuthStateEnum { UN_INITIALIZED='UN_INITIALIZED',AUTHENTICATED='AUTHE
 
 interface AuthContextType {
 	data:AuthState|undefined;
-	// setAuthState:Dispatch<React.SetStateAction<AuthState>>;
 	saveAuthState: (data:Partial<AuthState>)=>Promise<void>;
-	// login: (email: string, password: string) => Promise<boolean>;
-	// register: (userData: FormData) => Promise<boolean>;
-	// logout: () => Promise<void>;
-	// updateUser: (userData: Partial<any>) => Promise<boolean>;
-	// error: any | null;
+	
 }
 const initialCtx = {
 	data: undefined as AuthContextType['data']
@@ -38,10 +33,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 	useEffect(() => {
 		loadAuthState();
-		axios.interceptors.request.use(
+
+		const requestInterceptor = axios.interceptors.request.use(
 			(config) => {
 				const { url, method } = config;
-				console.log("cws::network_request:", { method, url });
+				console.log("cws::network_request:", [method, '---', url].join(' '));
 				return config;
 			},
 			(error) => {
@@ -49,32 +45,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 			}
 		);
 
-		axios.interceptors.response.use(
+		const responseInterceptor = axios.interceptors.response.use(
 			(response) => {
-				console.log("cws::network_response:", {
-					url: response.config.url,
-					method: response.config.method,
-					status: response.status
-				});
+				console.log("cws::network_response:", [
+					response.config.method,
+					response.status,
+					response.config.url,
+				].join(' '));
 				return response;
 			},
 			(error) => {
 				if (axios.isAxiosError(error) && error.response && error.response.status === 401) {
-					// Handle authorization error here
-					// For example, redirect to login page or show an error message
+					
 					setAuthState((past) => ({ ...past, error: error.response?.data }));
 				}
 				return Promise.reject(error);
 			}
 		);
+
+		return () => {
+			axios.interceptors.request.eject(requestInterceptor);
+			axios.interceptors.response.eject(responseInterceptor);
+		};
+
 	}, []);
 
 
-	const saveAuthState = async (newAuthState: AuthState) => {
+	const saveAuthState = async (newAuthStateData: AuthState) => {
 		try {
-			await AsyncStorage.setItem("authState", JSON.stringify(newAuthState));
-			setAuthState(prev=>({...prev,data:newAuthState}));
-			// setAxiosDefaultHeaders(newAuthState.token);
+			await AsyncStorage.setItem("authState", JSON.stringify({data:newAuthStateData}));
+			setAuthState(prev=>({data:{...prev?.data,...newAuthStateData}}));
 		} catch (error) {
 			console.error("Error saving auth state:", error);
 		}
@@ -91,16 +91,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 	const loadAuthState = async () => {
 		try {
 			const storedAuthState = await AsyncStorage.getItem("authState");
+			console.log({storedAuthState})
 			const parsedAuthState = JSON.parse(storedAuthState??'{data:null}');
 			if (parsedAuthState) {
-				setAuthState(('data' in parsedAuthState)?parsedAuthState:({data:parsedAuthState}));
-				// setAxiosDefaultHeaders(parsedAuthState.token);
+				const data = ({data:{user:null,token:null,error:null,...parsedAuthState?.data}})
+				saveAuthState(data.data);
 			}
 		} catch (error) {
 			console.error("Error loading auth state:", error);
+			saveAuthState({token:undefined,user:undefined,error:undefined})
 		}
 	};
 
+	if (authState?.data ===undefined){
+		return <LoadingState />
+	}
 
 	return <AuthContext.Provider value={{...authState,saveAuthState} as AuthContextType}>{children}</AuthContext.Provider>;
 }
@@ -116,19 +121,6 @@ export function useAuthContext() {
 			}).then(r=>r.data)
 			.then(({access_token:token,user})=>saveAuthState({ token, user }));
 
-
-			const response = await axios.post(`${API_BASE_URL}/login`, {
-				email,
-				password
-			});
-			const { access_token: token, user } = response.data;
-			if (token && user) {
-				await saveAuthState({ token, user });
-				return true;
-			} else {
-				console.error("Login response missing token or user data");
-				return false;
-			}
 		} catch (error) {
 			console.error("Login error:", error);
 			return false;
@@ -169,7 +161,6 @@ export function useAuthContext() {
 		try {
 			Promise.resolve([axios.post(`${API_BASE_URL}/logout`), await AsyncStorage.removeItem("authState")]);
 			saveAuthState({ token: null, user: null });
-			// setAxiosDefaultHeaders(null);
 		} catch (error) {
 			console.error("Logout error:", error);
 		}
@@ -186,10 +177,8 @@ export function useAuthContext() {
 
 	const contextValue = {
 		...(authState??{}),
-		get isAuthenticated() {
-			return !authState?.error && [null, undefined, ""].includes(authState?.token);
-			// return isAuthenticated;
-		},
+	
+		isAuthenticated,
 		get stateEnum(){
 			
 			if (authState?.token ===undefined){
@@ -211,9 +200,6 @@ export function useAuthContext() {
 export const WhenAuthed=({children})=>{
 	const {stateEnum}=useAuthContext()
 
-	if (stateEnum===AuthStateEnum.UN_INITIALIZED){
-		return <LoadingState />
-	}
 	
 	if (stateEnum===AuthStateEnum.UN_AUTHENTICATED){
 		return <Redirect href={'/login'} />
@@ -224,9 +210,7 @@ export const WhenAuthed=({children})=>{
 export const WhenNotAuthed=({children})=>{
 	const {stateEnum}=useAuthContext()
 
-	if (stateEnum===AuthStateEnum.UN_INITIALIZED){
-		return <LoadingState />
-	}
+	
 	
 	if (stateEnum===AuthStateEnum.AUTHENTICATED){
 		return <Redirect href={'/(tabs)/home'} />
