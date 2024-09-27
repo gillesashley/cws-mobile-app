@@ -42,6 +42,7 @@ const styles = StyleSheet.create({
         borderBottomColor: "#e0e0e0"
     },
     listContent: {
-        padding: 16
+        padding: 16,
+        rowGap: 20
     }
 });
