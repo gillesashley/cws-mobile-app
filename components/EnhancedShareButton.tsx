@@ -41,7 +41,7 @@ export function EnhancedShareButton({
   const handleShare = async (platform: string) => {
     try {
       let url = "";
-      let message = `Check out this campaign: ${shareableUrl}`;
+      const message = `Check out this campaign: ${shareableUrl}`;
 
       switch (platform) {
         case "whatsapp":

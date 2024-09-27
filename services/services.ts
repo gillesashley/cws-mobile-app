@@ -326,7 +326,7 @@ export const useApi = () => {
 		getCampaignsNational: (options?:SWROptions)=>useSWR<CampaignMessage[],AxiosError>('/campaign-messages/national',()=> axiosInstance.get('/campaign-messages?sort=-created_at&include=user_liked&filter[national]').then(r=>r.data.data),options),
 		getUserBalance: (options?:SWROptions)=>useSWR<{balance:number},AxiosError>('/user-balance',(key)=> axiosInstance.get(key).then(r=>r.data),options),
 		getWithdrawals: (options?:SWROptions)=>useSWR<any,AxiosError>('/reward-withdrawals',(key)=>axiosInstance.get(key).then(r=>r.data),options),
-		mxWithdrawals: (options?:SWROptions)=> useSWRMutation('/reward-withdrawals' , (url,{arg}:{arg:{amount:Number}}) =>
+		mxWithdrawals: (options?:SWROptions)=> useSWRMutation('/reward-withdrawals' , (url,{arg}:{arg:{amount:number}}) =>
 			axiosInstance
 				.post(url,arg)
 				.then(d => zPointWithdrawals.parse(d.data))
