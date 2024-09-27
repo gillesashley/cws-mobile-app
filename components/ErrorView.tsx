@@ -30,7 +30,9 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
         }
     };
 
-    console.log({error})
+    if (!error) return <></>
+
+    console.error(error)
 
     return (
         <Modal visible={active} animationType="none" onRequestClose={dismiss}>
