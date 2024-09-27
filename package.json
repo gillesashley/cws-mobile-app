@@ -10,14 +10,16 @@
     "ios": "expo run:ios",
     "web": "expo start --web -c",
     "test": "jest --watchAll",
-    "lint": "yes | npx expo lint",
+    "lint": "npm run lint:prettier;npm run lint:eslint",
     "build:android": "time eas build -e preview -p android ${stage:-'--local'}",
     "build:android:preview": "eas build -p android -e preview --local",
     "build:android:remote": "stage=\" \" npm run build:android",
     "postinstall": "patch-package",
     "doctor": "yes | time npx expo install --check && npx expo-doctor",
     "log:adb": "adb logcat",
-    "install:android:local": "adb install $(ls -t | grep build | head -n 1)"
+    "install:android:local": "adb install $(ls -t | grep build | head -n 1)",
+    "lint:eslint": "npx eslint --fix app/* components/* hooks/* services/*",
+    "lint:prettier": "npx prettier -w app/* components/* hooks/* services/*"
   },
   "jest": {
     "preset": "jest-expo"
@@ -78,6 +80,8 @@
     "@types/react-test-renderer": "^18.0.7",
     "autoprefixer": "^10.4.20",
     "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react": "^7.37.0",
     "globals": "^15.9.0",
     "jest": "^29.7.0",
