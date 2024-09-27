@@ -6,11 +6,11 @@ export const useIterator = <T extends any[]>(data: T = [] as any as T, delay = 5
     const [idx, setIdx] = useState<null | number>(0);
 
     useEffect(() => {
-        if (items !== data) { setItems(data); }
+        if (JSON.stringify(items) !== JSON.stringify(data)) { setItems(data); }
 
         if (!items?.length) { return; }
 
-        const intervalCb = setInterval(() => setIdx(prev => ((++prev)) % items.length), delay);
+        const intervalCb = setInterval(() => setIdx(prev => ((prev+1)) % items.length), delay);
 
         return () => clearInterval(intervalCb);
     }, [data]);
