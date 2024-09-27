@@ -86,7 +86,7 @@ export default function HomeScreen() {
             <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={onRefresh} colors={["#9Bd35A", "#689F38"]} />}>
                 
                 <View style={styles.bannerContainer} className="mt-5">
-                    <Image source={nextCtyBanner?.image_url ||nextDefaultBanner} style={styles.banner} resizeMode="cover" />
+                    <Image source={nextCtyBanner?.image_url?{uri:nextCtyBanner?.image_url }:nextDefaultBanner} style={styles.banner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
@@ -97,7 +97,7 @@ export default function HomeScreen() {
                 />
 
                 <View style={styles.bannerContainer}>
-                    <Image source={nextRgBanner?.image_url||nextDefaultBanner} style={styles.extraBanner} resizeMode="cover" />
+                    <Image source={nextRgBanner?.image_url?{uri:nextRgBanner?.image_url}:nextDefaultBanner} style={styles.extraBanner} resizeMode="cover" />
                 </View>
 
                 <CampaignSection
