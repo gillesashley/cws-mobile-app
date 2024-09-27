@@ -334,9 +334,11 @@ export const useApi = () => {
 		getPoints: (options?:SWROptions)=>useSWR<PointsData,AxiosError>('/points',(key)=>axiosInstance.get(key).then(r=>r.data),options),
 		getUserProfile: (options?:SWROptions)=>useSWR<UserProfile,AxiosError>('/user-profile',(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
 		mxUpdateUserProfile:(options?:SWROptions)=>useSWRMutation<UserProfile&{token:string|undefined},AxiosError>('/user-profile',(url,{arg}:{arg:typeof zNewUserProfile._type})=>axiosInstance.patch(url,arg) as any,options) ,
-		getConstituencyBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=${auth.user?.constituency_id}&filter[bannerable_type]=\\App\\Models\\Constituency`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
-		getRegionBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=${auth.user?.region_id}&filter[bannerable_type]=\\App\\Models\\Region`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
-		getNationalBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filters[bannerable_id]=&filter[bannerable_type]=`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		getConstituencyBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filter[bannerable_id]=${auth.user?.constituency_id}&filter[bannerable_type]=Constituency`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		getRegionBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filter[bannerable_id]=${auth.user?.region_id}&filter[bannerable_type]=Region`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
+		getNationalBanners: (options?:SWROptions)=>useSWR<Banner[],AxiosError>(`/banners?filter[bannerable_id]=null&filter[bannerable_type]=null`,(key)=>axiosInstance.get(key).then(r=>r.data.data),options),
 	};
 	
 };
+
+
