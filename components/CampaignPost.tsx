@@ -47,7 +47,7 @@ export function CampaignPost(props: CampaignPostProps) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor }]} className='nfc-campaign-post-item xs:w-1/2 lg:w-1/4'>
+    <View style={[styles.container, { backgroundColor }]} className='nfc-campaign-post-item xs:w-[100vw] sm:w-[50vw] lg:w-1/4 w-full'>
       <CampaignPostImage imageUrl={props.image_url} style={styles.image} />
       <LinearGradient
         colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -68,7 +68,7 @@ export function CampaignPost(props: CampaignPostProps) {
 
 const styles = StyleSheet.create({
   container: {
-    width: CARD_WIDTH,
+    // width: CARD_WIDTH,
     height: CARD_HEIGHT,
     borderRadius: 12, // Reduce border radius slightly to match the smaller card size
     marginRight: 12,
