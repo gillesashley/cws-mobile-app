@@ -17,6 +17,9 @@
       "distribution": "internal",
       "env":{
         "EXPO_PUBLIC_API_URL":"https://campaignwithus.com/api"
+      },
+      "ios":{
+        "simulator":true
       }
     },
     "production": {

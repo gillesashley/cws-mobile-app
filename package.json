@@ -11,6 +11,8 @@
     "web": "expo start --web -c",
     "test": "jest --watchAll",
     "lint": "npm run lint:prettier;npm run lint:eslint",
+    "build:ios": "time eas build -e preview -p ios ${stage:-'--local'}",
+    "build:ios:remote": "stage=\" \" npm run build:ios-d",
     "build:android": "time eas build -e preview -p android ${stage:-'--local'}",
     "build:android:preview": "eas build -p android -e preview --local",
     "build:android:remote": "stage=\" \" npm run build:android",
