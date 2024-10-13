@@ -8,5 +8,10 @@
   "trailingComma": "all",
   "bracketSpacing": true,
   "bracketSameLine": true,
-  "arrowParens": "always"
+  "arrowParens": "always",
+  "sortingMethod":"alphabetical",
+  "plugins": [
+    "prettier-plugin-sort-imports",
+    "prettier-plugin-organize-imports"
+  ]
 }
