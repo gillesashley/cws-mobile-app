@@ -1,17 +1,13 @@
 {
-  "parser": "babel",
-  "printWidth": 160,
-  "tabWidth": 4,
-  "useTabs": false,
-  "semi": true,
-  "singleQuote": false,
-  "trailingComma": "all",
-  "bracketSpacing": true,
-  "bracketSameLine": true,
-  "arrowParens": "always",
-  "sortingMethod":"alphabetical",
-  "plugins": [
-    "prettier-plugin-sort-imports",
-    "prettier-plugin-organize-imports"
-  ]
+    "printWidth": 160,
+    "tabWidth": 4,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "bracketSameLine": true,
+    "arrowParens": "always",
+    "sortingMethod": "alphabetical",
+    "plugins": ["prettier-plugin-sort-imports", "prettier-plugin-organize-imports"]
 }
