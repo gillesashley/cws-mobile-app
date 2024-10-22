@@ -1,19 +1,19 @@
+import "@/global.css";
+import "react-native-reanimated";
+
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
-import "react-native-reanimated";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { SWRConfig } from "swr";
 
-import { AuthProvider, WhenAuthed, WhenNotAuthed } from "@/components/AuthProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import { ExpoErrorBoundary } from "@/components/ErrorBoundary";
 import { UserDataProvider } from "@/components/UserDataContext";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useCustomFonts } from "@/hooks/useCustomFonts";
-import { StatusBar } from "expo-status-bar";
-import { SWRConfig } from "swr";
-
-import "../global.css";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,7 +44,7 @@ export default function RootLayout() {
                                         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
                                         <Stack.Screen name="(public)" options={{ headerShown: false }} />
-                                        
+
                                         <Stack.Screen name="full-post" options={{ headerShown: false }} />
 
                                         <Stack.Screen name="+not-found" />

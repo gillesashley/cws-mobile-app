@@ -1,22 +1,13 @@
-import {useRouter} from "expo-router";
-import React, {useState} from "react";
-import {
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    ScrollView,
-    View,
-} from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import axios from 'axios';
+import axios from "axios";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Alert, Dimensions, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import {useAuthContext} from "@/components/AuthProvider";
-import {ThemedText} from "@/components/ThemedText";
-import {Button} from "@/components/ui/Button";
-import {useThemeColor} from "@/hooks/useThemeColor";
+import { useAuthContext } from "@/components/AuthProvider";
+import { ThemedText } from "@/components/ThemedText";
+import { Button } from "@/components/ui/Button";
+import { useThemeColor } from "@/hooks/useThemeColor";
 
 import CredentialsStep from "@/components/registration/CredentialsStep";
 import LocationStep from "@/components/registration/LocationStep";
@@ -25,21 +16,19 @@ import VerificationStep from "@/components/registration/VerificationStep";
 enum RegistrationStep {
     Credentials = 1,
     Location = 2,
-    Verification = 3
+    Verification = 3,
 }
 
-const {width} = Dimensions.get("window");
-const {height} = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 export default function Register() {
-    const [currentStep, setCurrentStep] = useState<RegistrationStep>(
-        RegistrationStep.Credentials
-    );
+    const [currentStep, setCurrentStep] = useState<RegistrationStep>(RegistrationStep.Credentials);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         password: "",
-        password_confirmation:"",
+        password_confirmation: "",
         regionId: "",
         constituencyId: "",
         phone: "",
@@ -50,14 +39,14 @@ export default function Register() {
     });
     const [isLoading, setIsLoading] = useState(false);
 
-    const {register} = useAuthContext();
+    const { register } = useAuthContext();
     const router = useRouter();
     const backgroundColor = useThemeColor({}, "background");
     const primaryColor = useThemeColor({}, "primary");
 
     const onChange = (stepData: Partial<typeof formData>) => {
-        console.log({currentStep,stepData})
-        setFormData((prev)=>({...prev, ...stepData}));
+        console.log({ currentStep, stepData });
+        setFormData((prev) => ({ ...prev, ...stepData }));
         // if (currentStep < RegistrationStep.Verification) {
         //     setCurrentStep(currentStep + 1);
         // } else {
@@ -65,13 +54,13 @@ export default function Register() {
         // }
     };
 
-    const handleNext = (change=0) => {
+    const handleNext = (change = 0) => {
         // if (currentStep > RegistrationStep.Credentials) {
         //     setCurrentStep(currentStep - 1);
         // }
 
-        const tempNextStep = currentStep+change
-        if (!(0<=tempNextStep && tempNextStep<= Object.values(RegistrationStep).length))return;
+        const tempNextStep = currentStep + change;
+        if (!(0 <= tempNextStep && tempNextStep <= Object.values(RegistrationStep).length)) return;
         setCurrentStep(tempNextStep);
     };
 
@@ -81,35 +70,33 @@ export default function Register() {
             const registrationData = new FormData();
 
             // Append all form fields to FormData
-            registrationData.append('name', formData.name);
-            registrationData.append('email', formData.email);
-            registrationData.append('password', formData.password);
-            registrationData.append('password_confirmation', formData.password_confirmation);
-            registrationData.append('phone', formData.phone);
-            registrationData.append('date_of_birth', formData.dateOfBirth.toISOString().split('T')[0]);
-            registrationData.append('ghana_card_id', formData.ghanaCardId);
-            registrationData.append('region_id', formData.regionId);
-            registrationData.append('constituency_id', formData.constituencyId);
-            registrationData.append('area', formData.area);
+            registrationData.append("name", formData.name);
+            registrationData.append("email", formData.email);
+            registrationData.append("password", formData.password);
+            registrationData.append("password_confirmation", formData.password_confirmation);
+            registrationData.append("phone", formData.phone);
+            registrationData.append("date_of_birth", formData.dateOfBirth.toISOString().split("T")[0]);
+            registrationData.append("ghana_card_id", formData.ghanaCardId);
+            registrationData.append("region_id", formData.regionId);
+            registrationData.append("constituency_id", formData.constituencyId);
+            registrationData.append("area", formData.area);
 
             // Handle Ghana Card Image
             if (formData.ghanaCardImage) {
-                const uriParts = formData.ghanaCardImage.split('.');
+                const uriParts = formData.ghanaCardImage.split(".");
                 const fileType = uriParts[uriParts.length - 1];
-                registrationData.append('ghana_card_image', {
+                registrationData.append("ghana_card_image", {
                     uri: formData.ghanaCardImage,
                     name: `ghana_card.${fileType}`,
                     type: `image/${fileType}`,
                 } as any);
             }
 
-           
             const success = await register(registrationData);
             if (success) {
-                Platform.OS!=='web'?
-                Alert.alert("Success", "Registration successful", [
-                    {text: "OK", onPress: () => router.replace("/login")},
-                ]):window.confirm('Success: Registration successfull') && router.push('/login');
+                Platform.OS !== "web"
+                    ? Alert.alert("Success", "Registration successful", [{ text: "OK", onPress: () => router.replace("/login") }])
+                    : window.confirm("Success: Registration successfull") && router.push("/login");
             } else {
                 Alert.alert("Registration Failed", "Please try again");
             }
@@ -129,26 +116,11 @@ export default function Register() {
     const renderStep = () => {
         switch (currentStep) {
             case RegistrationStep.Credentials:
-                return (
-                    <CredentialsStep
-                        onChange={onChange}
-                        initialData={formData}
-                    />
-                );
+                return <CredentialsStep onChange={onChange} initialData={formData} />;
             case RegistrationStep.Location:
-                return (
-                    <LocationStep
-                        onChange={onChange}
-                        initialData={formData}
-                    />
-                );
+                return <LocationStep onChange={onChange} initialData={formData} />;
             case RegistrationStep.Verification:
-                return (
-                    <VerificationStep
-                        onChange={onChange}
-                        initialData={formData}
-                    />
-                );
+                return <VerificationStep onChange={onChange} initialData={formData} />;
             default:
                 return null;
         }
@@ -158,12 +130,7 @@ export default function Register() {
         const progress = (currentStep / 3) * 100;
         return (
             <View style={styles.progressBarContainer}>
-                <View
-                    style={[
-                        styles.progressBar,
-                        {width: `${progress}%`, backgroundColor: primaryColor},
-                    ]}
-                />
+                <View style={[styles.progressBar, { width: `${progress}%`, backgroundColor: primaryColor }]} />
             </View>
         );
     };
@@ -182,54 +149,33 @@ export default function Register() {
     };
 
     return (
-        <SafeAreaView style={[styles.container, {backgroundColor}]}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.keyboardAvoidingView}
-            >
-                <ScrollView
-                   contentContainerStyle={styles.scrollViewContent}
-                   keyboardShouldPersistTaps="handled"
-                 >
-                <View style={styles.content}>
-                    <Image
-                        source={require("@/assets/images/logo.png")}
-                        style={styles.logo}
-                    />
-                    {renderProgressBar()}
-                    <ThemedText style={styles.title}>{getStepTitle()}</ThemedText>
-                    <ThemedText style={styles.subtitle}>
-                        Step {currentStep} of 3
-                    </ThemedText>
-                    {renderStep()}
-                    <View style={styles.navigationButtons}>
-                        {currentStep > RegistrationStep.Credentials && (
-                            <Button
-                                title="Previous"
-                                onPress={()=>handleNext(-1)}
-                                backgroundColor="#0200FF"
-                                style={styles.button}
-                            />
-                        )}
-                        {currentStep < RegistrationStep.Verification && (
-                            <Button
-                                title="Next"
-                                onPress={() => handleNext(1)}
-                                backgroundColor="#0200FF"
-                                style={styles.button}
-                            />
-                        )}
-                        {currentStep === RegistrationStep.Verification && (
-                            <Button
-                                title={isLoading ? "Registering..." : "Complete"}
-                                onPress={handleRegister}
-                                backgroundColor="#0200FF"
-                                disabled={isLoading}
-                                style={styles.button}
-                            />
-                        )}
+        <SafeAreaView style={[styles.container, { backgroundColor }]}>
+            <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardAvoidingView}>
+                <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
+                    <View style={styles.content}>
+                        <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+                        {renderProgressBar()}
+                        <ThemedText style={styles.title}>{getStepTitle()}</ThemedText>
+                        <ThemedText style={styles.subtitle}>Step {currentStep} of 3</ThemedText>
+                        {renderStep()}
+                        <View style={styles.navigationButtons}>
+                            {currentStep > RegistrationStep.Credentials && (
+                                <Button title="Previous" onPress={() => handleNext(-1)} backgroundColor="#0200FF" style={styles.button} />
+                            )}
+                            {currentStep < RegistrationStep.Verification && (
+                                <Button title="Next" onPress={() => handleNext(1)} backgroundColor="#0200FF" style={styles.button} />
+                            )}
+                            {currentStep === RegistrationStep.Verification && (
+                                <Button
+                                    title={isLoading ? "Registering..." : "Complete"}
+                                    onPress={handleRegister}
+                                    backgroundColor="#0200FF"
+                                    disabled={isLoading}
+                                    style={styles.button}
+                                />
+                            )}
+                        </View>
                     </View>
-                </View>
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>

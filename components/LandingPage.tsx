@@ -1,10 +1,11 @@
-import React from "react";
-import { View, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useRouter } from "expo-router";
+import React from "react";
+import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LandingPage() {
     const router = useRouter();
