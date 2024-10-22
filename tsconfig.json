@@ -1,17 +1,17 @@
 {
-  "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+    "compilerOptions": {
+        "strict": true,
+        "jsx": "react-native",
+        "esModuleInterop": true,
+        "allowJs": true,
+        "paths": {
+            "@/components/*": ["./components/*"],
+            "@/scripts/*": ["./scripts/*"],
+            "@/services/*": ["./services/*"],
+            "@/hooks/*": ["./hooks/*"],
+            "@/*": ["./*"]
+        }
+    },
+    "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "nativewind-env.d.ts"],
+    "extends": "expo/tsconfig.base"
 }
