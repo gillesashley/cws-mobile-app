@@ -1,5 +1,6 @@
-import { WhenNotAuthed } from "@/components/AuthProvider";
 import { Stack } from "expo-router";
+
+import { WhenNotAuthed } from "@/components/AuthProvider";
 
 export default function RootLayout() {
     return (

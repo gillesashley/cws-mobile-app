@@ -1,7 +1,7 @@
 import React from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/ThemedText";
+
 import { useThemeColor } from "@/hooks/useThemeColor";
 
 export const LoadingState = () => {

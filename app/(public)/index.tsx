@@ -1,7 +1,6 @@
-import { AuthStateEnum, useAuthContext } from "@/components/AuthProvider";
-import { LoadingState } from "@/components/profile-page/LoadingState";
 import { Redirect } from "expo-router";
-import { useEffect } from "react";
+
+import { useAuthContext } from "@/components/AuthProvider";
 
 export default function Index() {
     const { isAuthenticated, stateEnum } = useAuthContext();

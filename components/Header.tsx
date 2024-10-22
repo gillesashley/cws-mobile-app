@@ -31,26 +31,26 @@ const styles = StyleSheet.create({
         padding: 16,
         height: 70,
         borderBottomWidth: 1,
-        borderBottomColor: "#e0e0e0"
+        borderBottomColor: "#e0e0e0",
     },
     logo: {
         width: 35,
         height: 35,
         backgroundSize: "contain",
-        marginRight: 8
+        marginRight: 8,
     },
     headerTitle: {
         fontSize: 18,
-        fontWeight: "bold"
+        fontWeight: "bold",
     },
     balanceContainer: {
         marginLeft: "auto",
         borderRadius: 16,
         paddingVertical: 4,
-        paddingHorizontal: 12
+        paddingHorizontal: 12,
     },
     balanceText: {
         color: "white",
-        fontWeight: "bold"
-    }
+        fontWeight: "bold",
+    },
 });

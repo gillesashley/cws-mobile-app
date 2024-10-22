@@ -1,10 +1,9 @@
+import { useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Modal, StyleSheet, View } from "react-native";
+import { useAuthContext } from "./AuthProvider";
 import { ThemedText } from "./ThemedText";
 import { Button } from "./ui/Button";
-import { useAuth } from "@/hooks/useAuth";
-import { useNavigation } from "expo-router";
-import { useAuthContext } from "./AuthProvider";
 
 interface ErrorViewProps {
     error: string;
@@ -18,8 +17,7 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
     const [active, setActive] = useState(false);
 
     useEffect(() => {
-
-        !active&& !!error && setActive(true);
+        !active && !!error && setActive(true);
     }, [error]);
 
     const dismiss = () => setActive(false);
@@ -30,14 +28,14 @@ export const ErrorView: React.FC<ErrorViewProps> = ({ error, onRetry }) => {
         }
     };
 
-    if (!error) return <></>
+    if (!error) return <></>;
 
-    console.error(error)
+    console.error(error);
 
     return (
         <Modal visible={active} animationType="none" onRequestClose={dismiss}>
             <View style={styles.container} className="flex flex-col gap-10">
-              {/* <ThemedText>authenticated:{auth.isAuthenticated?'true':'false'}</ThemedText> */}
+                {/* <ThemedText>authenticated:{auth.isAuthenticated?'true':'false'}</ThemedText> */}
                 <ThemedText style={styles.errorText}>{error}</ThemedText>
                 <ThemedText style={styles.errorText}>{auth.error?.message}</ThemedText>
                 {!!onRetry && <Button title="Try Again" onPress={doTryAgain} style={styles.button} />}
@@ -53,14 +51,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        padding: 16
+        padding: 16,
     },
     errorText: {
         fontSize: 16,
         textAlign: "center",
-        marginBottom: 16
+        marginBottom: 16,
     },
     button: {
-        minWidth: 120
-    }
+        minWidth: 120,
+    },
 });

@@ -2,10 +2,10 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { Platform } from "react-native";
 
+import { useAuthContext, WhenAuthed } from "@/components/AuthProvider";
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
 import { Colors } from "@/constants/Colors";
 import { useThemeColor } from "@/hooks/useThemeColor";
-import { useAuthContext, WhenAuthed } from "@/components/AuthProvider";
 
 export default function TabLayout() {
     // const colorScheme = useColorScheme();

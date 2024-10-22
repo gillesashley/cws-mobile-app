@@ -10,7 +10,6 @@
     "ios": "expo run:ios",
     "web": "expo start --web -c",
     "test": "jest --watchAll",
-    "lint": "npm run lint:eslint && npm run lint:esliprettiernt",
     "build:ios": "time eas build -e preview -p ios ${stage:-'--local'}",
     "build:ios:remote": "stage=\" \" npm run build:ios-d",
     "build:android": "time eas build -e preview -p android ${stage:-'--local'}",
@@ -20,6 +19,7 @@
     "doctor": "yes | time npx expo install --check && npx expo-doctor",
     "log:adb": "adb logcat",
     "install:android:local": "adb install $(ls -t | grep build | head -n 1)",
+    "lint": "npm run lint:prettier && npm run lint:eslint",
     "lint:eslint": "npx eslint --fix app/* components/* hooks/* services/*",
     "lint:prettier": "npx prettier -w app/* components/* hooks/* services/*"
   },
